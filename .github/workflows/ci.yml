@@ -1,0 +1,52 @@
+# The repository's own CI. It runs the GREEN suite (test/) and the typechecker,
+# and it is green.
+#
+# It deliberately does NOT run `npm run repro`. That directory holds the seeded
+# failures and is red on purpose; wiring it into CI would make a permanently
+# red badge that nobody reads. `npm run repro` is a thing you run by hand when
+# you want to see the bugs.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  # Proof that the seeded defects are still seeded. This job PASSES when the
+  # repro suite FAILS: a green repro run means somebody fixed a bug the demo
+  # depends on, and the demo would then be quietly lying about what it holds.
+  seeded-bugs-still-fail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: repro/ must be red
+        run: |
+          if npm run repro; then
+            echo "::error::repro/ passed. A seeded defect has been fixed; update SEEDED.md and issues/ to match."
+            exit 1
+          fi
+          echo "repro/ failed, as designed."
+      - name: negative/ must be green
+        run: npm run negative
