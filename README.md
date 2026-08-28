@@ -25,11 +25,11 @@ wrong on purpose.
 
 ## What it has to do with Credda
 
-[Credda](https://credda.io) finds the security risks and the bugs in a
-company's production and QA environments and opens the pull request that fixes
-them: it runs in your own CI, reproduces the reported failure, finds what
-actually caused it, writes the patch, and proves it with a test that fails
-before and passes after. A person reviews the diff; Credda never merges.
+[Credda](https://credda.io) finds the bugs and security vulnerabilities in a
+company's production and QA environments, reproduces the failure, diagnoses the
+cause, writes the patch, proves it with a test that fails before and passes
+after, and opens a pull request. It runs in your own CI. It proposes and never
+merges.
 
 Toolshed is the repository you point it at when you want to see that for
 yourself, on defects whose answers are written down in advance.
@@ -76,7 +76,7 @@ npm install
 
 npm test          # the repository's own suite. 56 tests. Green.
 npm run repro     # the seeded failures. 28 assertions. ALL RED, on purpose.
-npm run negative  # the three cases with nothing to fix. 3 tests. Green.
+npm run negative  # the three refusals that can be shown by running code. 3 tests. Green.
 ```
 
 Then open two files side by side:
@@ -106,7 +106,7 @@ would be reproducing it and missing what it is.
 | `src/` | The application. Ten seeded defects and four seeded vulnerabilities live in here. |
 | `test/` | The repository's own suite. Green, and green honestly -- it simply does not cover the defective paths, which is why the defects survive it. |
 | `repro/` | One reproduction per real defect. **Red on purpose.** Not run by `npm test`. |
-| `negative/` | The reproductions for the three cases with nothing to fix. Green. |
+| `negative/` | Reproductions for the three of the five refusals that *have* one to write. (11 and 12 have nothing runnable in them at all — that is the point of those two.) Green. |
 | `issues/` | Nineteen bug reports, one per case. |
 | `SEEDED.md` | The manifest: defect, report, correct reproduction, expected Credda outcome. |
 
