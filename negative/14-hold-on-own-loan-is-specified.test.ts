@@ -6,7 +6,7 @@
  * it on purpose -- see the commented test in test/holds.test.ts, "refuses a
  * hold on an item the member already has on loan".
  *
- * That combination is CodeReef's CONTRADICTS_SPECIFICATION: the behaviour
+ * That combination is Credda's CONTRADICTS_SPECIFICATION: the behaviour
  * reproduced, and the specification says it is correct. Neither green nor red;
  * it goes to a human, because if the reported behaviour is wrong then the
  * specification is wrong too, and no tool gets to decide that.

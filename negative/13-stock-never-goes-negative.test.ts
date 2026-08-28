@@ -5,7 +5,7 @@
  * This file asserts exactly that, and the assertion does not hold: the second
  * checkout is refused and the count stays at zero. Nothing is wrong with the
  * repository, and a run that establishes that is a success -- it is what
- * CodeReef calls NO_CHANGE_REQUIRED.
+ * Credda calls NO_CHANGE_REQUIRED.
  */
 import { describe, expect, it } from 'vitest';
 import { createItem } from '../src/catalog.js';

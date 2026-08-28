@@ -1,4 +1,4 @@
-# CodeReef on this repository's issues.
+# Credda on this repository's issues.
 #
 # Two jobs on one trigger block:
 #
@@ -7,24 +7,24 @@
 #                either names something specific the reporter could add, or says
 #                nothing at all. Silence is a correct outcome.
 #
-#   investigate  fires when the `codereef` label is ADDED. Checks the repository
+#   investigate  fires when the `credda` label is ADDED. Checks the repository
 #                out, reproduces the reported failure in a sandbox, and comments
 #                what it established -- leading with what it did not.
 #
-# CodeReef writes no code and opens no pull request. `contents: read` and
+# Credda writes no code and opens no pull request. `contents: read` and
 # `issues: write` is the whole permission set; if you fork this and it asks for
 # more, that is the fork's decision.
 #
 # BEFORE YOU RUN THIS, create the label once:
 #
-#     gh label create codereef \
-#       --description 'CodeReef reproduces this bug in a sandbox and comments what it established.'
+#     gh label create credda \
+#       --description 'Credda reproduces this bug in a sandbox and comments what it established.'
 #
 # ACTION REFERENCE: `codereefai/codereef-action@v1` below is the intended public
 # location and DOES NOT EXIST YET. Until that repository is published this
 # workflow will fail to resolve the action. Update the two `uses:` lines when it
 # does, and pin a tag or a commit SHA rather than a branch.
-name: CodeReef
+name: Credda
 
 on:
   issues:
@@ -42,7 +42,7 @@ jobs:
     concurrency:
       # Keyed on the issue so a triage note and an investigation report cannot
       # race to comment on the same thread.
-      group: codereef-issue-${{ github.event.issue.number }}
+      group: credda-issue-${{ github.event.issue.number }}
       cancel-in-progress: false
     steps:
       # Optional in triage mode. With it, a refusal can say "this repository
@@ -53,11 +53,11 @@ jobs:
           mode: triage
 
   investigate:
-    if: github.event.action == 'labeled' && github.event.label.name == 'codereef'
+    if: github.event.action == 'labeled' && github.event.label.name == 'credda'
     runs-on: ubuntu-latest # the docker sandbox needs a Linux runner
     timeout-minutes: 30
     concurrency:
-      group: codereef-issue-${{ github.event.issue.number }}
+      group: credda-issue-${{ github.event.issue.number }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4

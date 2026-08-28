@@ -5,19 +5,19 @@ tools come back late, somebody queues for the good router.
 
 **Every bug in this repository is deliberate.** There are fourteen bug reports
 in [`issues/`](issues/) and ten seeded defects behind them. It is a demo and a
-teaching corpus for [CodeReef](https://github.com/codereefai), and it is not a
+teaching corpus for [Credda](https://github.com/codereefai), and it is not a
 library, a starter, or anything you should copy code out of.
 
-## What CodeReef does, and therefore what this repo is shaped like
+## What Credda does, and therefore what this repo is shaped like
 
-CodeReef takes a bug **report** -- a GitHub issue -- runs inside the repository's
+Credda takes a bug **report** -- a GitHub issue -- runs inside the repository's
 own CI, tries to **reproduce** the reported failure, and comments on what it
 established, leading with what it did not. **It writes no code and opens no pull
 request.** V1 is reproduce-and-report.
 
 So this repository is built around *reports*, not just bugs. The seeded defects
 exist so that there is something to report, reproduce, and then confirm or
-refuse. Four of the fourteen reports are cases CodeReef should **decline or find
+refuse. Four of the fourteen reports are cases Credda should **decline or find
 nothing in**, and those are the interesting ones -- see
 [`SEEDED.md`](SEEDED.md).
 
@@ -55,12 +55,12 @@ success.
 | `repro/` | One reproduction per real defect. **Red on purpose.** Not run by `npm test`. |
 | `negative/` | The reproductions for the two cases with no defect in them. Green. |
 | `issues/` | Fourteen bug reports, one per case. |
-| `SEEDED.md` | The manifest: defect, report, correct reproduction, expected CodeReef outcome. |
+| `SEEDED.md` | The manifest: defect, report, correct reproduction, expected Credda outcome. |
 
-## Running CodeReef against it
+## Running Credda against it
 
-[`.github/workflows/codereef.yml`](.github/workflows/codereef.yml) is ready to
-run: a `triage` job on opened issues and an `investigate` job on the `codereef`
+[`.github/workflows/credda.yml`](.github/workflows/credda.yml) is ready to
+run: a `triage` job on opened issues and an `investigate` job on the `credda`
 label, `contents: read` and `issues: write` and nothing else.
 
 > **The action reference needs updating.** Both `uses:` lines point at
@@ -70,11 +70,11 @@ label, `contents: read` and `issues: write` and nothing else.
 > is.
 
 To try it once that exists: paste the body of any file in `issues/` into a new
-issue in your fork, then add the `codereef` label.
+issue in your fork, then add the `credda` label.
 
 ```bash
-gh label create codereef \
-  --description 'CodeReef reproduces this bug in a sandbox and comments what it established.'
+gh label create credda \
+  --description 'Credda reproduces this bug in a sandbox and comments what it established.'
 ```
 
 An `ANTHROPIC_API_KEY` secret is optional. Without one the deterministic
