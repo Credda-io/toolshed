@@ -2,7 +2,7 @@
   "name": "toolshed",
   "version": "0.1.0",
   "private": true,
-  "description": "A deliberately bug-seeded community tool-lending library. Demo corpus for CodeReef.",
+  "description": "A deliberately bug-seeded community tool-lending library. Demo corpus for Credda.",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {

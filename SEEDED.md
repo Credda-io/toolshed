@@ -2,7 +2,7 @@
 
 Every defect below is deliberate. Each one has a report in `issues/`, a
 reproduction in `repro/` or `negative/`, and a stated expectation of what
-CodeReef should do with it.
+Credda should do with it.
 
 **The expectations are predictions, not measurements.** They say what a correct
 run looks like. Where a run disagrees with this table, this table is the thing
@@ -10,7 +10,7 @@ that was wrong until somebody checks which.
 
 ## Outcome vocabulary
 
-CodeReef's terminal outcomes, as used in the tables:
+Credda's terminal outcomes, as used in the tables:
 
 | Outcome | Means | Reads as |
 | --- | --- | --- |
@@ -46,7 +46,7 @@ on any of them would be wrong.
 ## Deliberate refusals and non-defects
 
 Four. **These matter more than the ten above.** A demo where the tool wins every
-time is a lie, and CodeReef's whole position is that it declines when it cannot
+time is a lie, and Credda's whole position is that it declines when it cannot
 show something.
 
 | # | Report | What it is | Expected | Why |

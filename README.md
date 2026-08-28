@@ -5,19 +5,19 @@ tools come back late, somebody queues for the good router.
 
 **Every bug in this repository is deliberate.** There are fourteen bug reports
 in [`issues/`](issues/) and ten seeded defects behind them. It is a demo and a
-teaching corpus for [CodeReef](https://github.com/codereefai), and it is not a
+teaching corpus for [Credda](https://github.com/Credda-io), and it is not a
 library, a starter, or anything you should copy code out of.
 
-## What CodeReef does, and therefore what this repo is shaped like
+## What Credda does, and therefore what this repo is shaped like
 
-CodeReef takes a bug **report** -- a GitHub issue -- runs inside the repository's
+Credda takes a bug **report** -- a GitHub issue -- runs inside the repository's
 own CI, tries to **reproduce** the reported failure, and comments on what it
 established, leading with what it did not. **It writes no code and opens no pull
 request.** V1 is reproduce-and-report.
 
 So this repository is built around *reports*, not just bugs. The seeded defects
 exist so that there is something to report, reproduce, and then confirm or
-refuse. Four of the fourteen reports are cases CodeReef should **decline or find
+refuse. Four of the fourteen reports are cases Credda should **decline or find
 nothing in**, and those are the interesting ones -- see
 [`SEEDED.md`](SEEDED.md).
 
@@ -55,26 +55,36 @@ success.
 | `repro/` | One reproduction per real defect. **Red on purpose.** Not run by `npm test`. |
 | `negative/` | The reproductions for the two cases with no defect in them. Green. |
 | `issues/` | Fourteen bug reports, one per case. |
-| `SEEDED.md` | The manifest: defect, report, correct reproduction, expected CodeReef outcome. |
+| `SEEDED.md` | The manifest: defect, report, correct reproduction, expected Credda outcome. |
 
-## Running CodeReef against it
+## Running Credda against it
 
-[`.github/workflows/codereef.yml`](.github/workflows/codereef.yml) is ready to
-run: a `triage` job on opened issues and an `investigate` job on the `codereef`
+[`.github/workflows/credda.yml`](.github/workflows/credda.yml) is ready to
+run: a `triage` job on opened issues and an `investigate` job on the `credda`
 label, `contents: read` and `issues: write` and nothing else.
 
-> **The action reference needs updating.** Both `uses:` lines point at
-> `codereefai/codereef-action@v1`, which is the intended public home of the
-> action and **does not exist yet**. Until it is published the workflow cannot
-> resolve, and you should pin a tag or a commit SHA rather than a branch when it
-> is.
+> **The action reference, as of 2026-08-27.** Both `uses:` lines now point at
+> `Credda-io/action@v1`, and that resolves: the repository is public and the
+> `v1` tag exists. It previously said `codereefai/codereef-action@v1`, which
+> was never a real repository under either organisation -- the action lives in
+> a repository called `action`, not `codereef-action`, so that reference was
+> wrong in the name as well as the owner and would not have resolved even
+> before the rename.
+>
+> Two things are still worth knowing rather than assuming. The action carries
+> no published GitHub Release, only the tag, so `@v1` is a moving reference:
+> **pin a commit SHA** if you need this workflow to keep meaning one thing.
+> And by its own README the install path is proven end to end while
+> `investigate` -- sandbox, reproduction, report -- is not proven outside
+> Credda's own repositories; treat the first investigation here as an
+> experiment rather than a service.
 
-To try it once that exists: paste the body of any file in `issues/` into a new
-issue in your fork, then add the `codereef` label.
+To try it: paste the body of any file in `issues/` into a new
+issue in your fork, then add the `credda` label.
 
 ```bash
-gh label create codereef \
-  --description 'CodeReef reproduces this bug in a sandbox and comments what it established.'
+gh label create credda \
+  --description 'Credda reproduces this bug in a sandbox and comments what it established.'
 ```
 
 An `ANTHROPIC_API_KEY` secret is optional. Without one the deterministic
