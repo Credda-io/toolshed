@@ -34,13 +34,22 @@ merges.
 Toolshed is the repository you point it at when you want to see that for
 yourself, on defects whose answers are written down in advance.
 
-**Status, 2026-08-27.** The reporting stages -- triage, reproduction,
+**Status, 2026-08-28.** The reporting stages -- triage, reproduction,
 diagnosis -- run today. The fix stage runs when a model-backed provider is
 configured; without one, the deterministic heuristic provider reproduces and
-reports and cannot reason over prose. Pull request authoring is not yet wired
-up, so a run on this repository comments rather than opening a PR. Several of
-the reports here are deliberately prose-heavy, which is where the difference
-between the two providers is easiest to see.
+reports and cannot reason over prose. Several of the reports here are
+deliberately prose-heavy, which is where the difference between the two
+providers is easiest to see.
+
+This paragraph said, on 2026-08-27, that pull request authoring was not wired up
+and that a run here comments rather than opening a PR. Half of that has moved:
+the engine's delivery path was wired on 2026-08-28 and opens a pull request for
+a run that reaches a proven verdict, so a run against this repository through
+the engine's GitHub App can now arrive as a diff. What has not moved is the
+launcher: the GitHub Action asks for no write scopes and still comments, by
+design, so a run driven from CI leaves a comment here and nothing else. Which
+one you get depends on how the run reached this repository, and that is worth
+knowing before you read a result as a verdict on the engine.
 
 ## Why the corpus is shaped the way it is
 
