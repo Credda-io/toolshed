@@ -5,7 +5,7 @@ tools come back late, somebody queues for the good router.
 
 **Every bug in this repository is deliberate.** There are fourteen bug reports
 in [`issues/`](issues/) and ten seeded defects behind them. It is a demo and a
-teaching corpus for [Credda](https://github.com/codereefai), and it is not a
+teaching corpus for [Credda](https://github.com/Credda-io), and it is not a
 library, a starter, or anything you should copy code out of.
 
 ## What Credda does, and therefore what this repo is shaped like
@@ -63,13 +63,23 @@ success.
 run: a `triage` job on opened issues and an `investigate` job on the `credda`
 label, `contents: read` and `issues: write` and nothing else.
 
-> **The action reference needs updating.** Both `uses:` lines point at
-> `codereefai/codereef-action@v1`, which is the intended public home of the
-> action and **does not exist yet**. Until it is published the workflow cannot
-> resolve, and you should pin a tag or a commit SHA rather than a branch when it
-> is.
+> **The action reference, as of 2026-08-27.** Both `uses:` lines now point at
+> `Credda-io/action@v1`, and that resolves: the repository is public and the
+> `v1` tag exists. It previously said `codereefai/codereef-action@v1`, which
+> was never a real repository under either organisation -- the action lives in
+> a repository called `action`, not `codereef-action`, so that reference was
+> wrong in the name as well as the owner and would not have resolved even
+> before the rename.
+>
+> Two things are still worth knowing rather than assuming. The action carries
+> no published GitHub Release, only the tag, so `@v1` is a moving reference:
+> **pin a commit SHA** if you need this workflow to keep meaning one thing.
+> And by its own README the install path is proven end to end while
+> `investigate` -- sandbox, reproduction, report -- is not proven outside
+> Credda's own repositories; treat the first investigation here as an
+> experiment rather than a service.
 
-To try it once that exists: paste the body of any file in `issues/` into a new
+To try it: paste the body of any file in `issues/` into a new
 issue in your fork, then add the `credda` label.
 
 ```bash
