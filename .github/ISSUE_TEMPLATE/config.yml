@@ -1,0 +1,10 @@
+blank_issues_enabled: true
+contact_links:
+  - name: The vulnerabilities in this repository are deliberate
+    url: https://github.com/Credda-io/toolshed/blob/main/SECURITY.md
+    about: >
+      Four of them, listed by class and location in SEEDED.md. Nothing here is
+      deployed. Read SECURITY.md before reporting a security finding.
+  - name: What Credda is
+    url: https://credda.io
+    about: This repository is the demo corpus you point Credda at.

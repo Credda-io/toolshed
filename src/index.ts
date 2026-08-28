@@ -8,3 +8,4 @@ export * from './holds.js';
 export * from './notify.js';
 export * from './csv.js';
 export * from './report.js';
+export * from './portal.js';

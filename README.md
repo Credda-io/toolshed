@@ -1,25 +1,72 @@
-# Toolshed
+# toolshed
 
-A small community tool-lending library, in TypeScript. Members borrow tools,
-tools come back late, somebody queues for the good router.
+[![Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-informational)](LICENSE)
+[![defects: deliberate](https://img.shields.io/badge/defects-deliberate-critical)](SEEDED.md)
+[![do not deploy](https://img.shields.io/badge/do%20not-deploy-critical)](SECURITY.md)
 
-**Every bug in this repository is deliberate.** There are fourteen bug reports
-in [`issues/`](issues/) and ten seeded defects behind them. It is a demo and a
-teaching corpus for [Credda](https://github.com/Credda-io), and it is not a
-library, a starter, or anything you should copy code out of.
+**A repository with known defects in it, so you can check whether a tool finds
+them.**
 
-## What Credda does, and therefore what this repo is shaped like
+Toolshed is a small community tool-lending library, in TypeScript. Members
+borrow tools, tools come back late, somebody queues for the good router. It is
+an ordinary-looking application with an ordinary-looking green test suite, and
+**every defect in it is deliberate**: ten bugs, four exploitable
+vulnerabilities, and five reports that should not produce a patch at all.
 
-Credda takes a bug **report** -- a GitHub issue -- runs inside the repository's
-own CI, tries to **reproduce** the reported failure, and comments on what it
-established, leading with what it did not. **It writes no code and opens no pull
-request.** V1 is reproduce-and-report.
+It exists because evaluating a bug-finding tool on your own repository is
+circular -- you do not know what is in there either. Here you do. There are
+nineteen bug reports in [`issues/`](issues/), and
+[`SEEDED.md`](SEEDED.md) says, for every one of them, what the defect is, where
+it lives, what a correct reproduction asserts, and what the right answer is
+including when the right answer is "nothing".
 
-So this repository is built around *reports*, not just bugs. The seeded defects
-exist so that there is something to report, reproduce, and then confirm or
-refuse. Four of the fourteen reports are cases Credda should **decline or find
-nothing in**, and those are the interesting ones -- see
-[`SEEDED.md`](SEEDED.md).
+**This is not a library, a starter, or anything to copy code out of.** It is
+wrong on purpose.
+
+## What it has to do with Credda
+
+[Credda](https://credda.io) finds the security risks and the bugs in a
+company's production and QA environments and opens the pull request that fixes
+them: it runs in your own CI, reproduces the reported failure, finds what
+actually caused it, writes the patch, and proves it with a test that fails
+before and passes after. A person reviews the diff; Credda never merges.
+
+Toolshed is the repository you point it at when you want to see that for
+yourself, on defects whose answers are written down in advance.
+
+**Status, 2026-08-27.** The reporting stages -- triage, reproduction,
+diagnosis -- run today. The fix stage runs when a model-backed provider is
+configured; without one, the deterministic heuristic provider reproduces and
+reports and cannot reason over prose. Pull request authoring is not yet wired
+up, so a run on this repository comments rather than opening a PR. Several of
+the reports here are deliberately prose-heavy, which is where the difference
+between the two providers is easiest to see.
+
+## Why the corpus is shaped the way it is
+
+Three things, and the third is the one that makes it useful.
+
+**Reports, not bugs.** Every defect arrives the way defects actually arrive: as
+somebody's prose. A wall calendar and a hunch about the clocks
+([`issues/02`](issues/02-due-date-a-day-early-in-november.md)), a joke that
+stopped being funny ([`issues/18`](issues/18-inventory-export-runs-a-formula-in-excel.md)),
+a complaint that is really a compliment ([`issues/03`](issues/03-i-have-four-holds.md)).
+Getting from that to a runnable assertion is the job.
+
+**Vulnerabilities as well as bugs.** Four of the nineteen are exploitable:
+broken access control, reflected XSS, regex injection with a denial of service
+behind it, and CSV formula injection. They are written for this repository and
+marked as deliberate in the source. **No dependency here has been pinned to a
+vulnerable version, and none ever will be** -- seeding a real CVE into a real
+package would make this repository a distribution channel for it. `npm audit` is
+clean and is meant to stay clean; the findings are in the code.
+
+**Five reports that should produce nothing.** A demo where the tool wins every
+time is a lie. One report has nothing runnable in it at all. One imports a
+module that does not exist. One describes behaviour the repository's own green
+suite asserts is correct. One is a member misremembering. One is a careful
+security report with no vulnerability behind it. Declining these is the harder
+half of the work, and `SEEDED.md` states which decline each one deserves.
 
 ## Five minutes
 
@@ -27,8 +74,9 @@ nothing in**, and those are the interesting ones -- see
 git clone <this repo> && cd toolshed
 npm install
 
-npm test          # the repository's own suite. 41 tests. Green.
-npm run repro     # the seeded failures. 20 assertions. ALL RED, on purpose.
+npm test          # the repository's own suite. 56 tests. Green.
+npm run repro     # the seeded failures. 28 assertions. ALL RED, on purpose.
+npm run negative  # the three cases with nothing to fix. 3 tests. Green.
 ```
 
 Then open two files side by side:
@@ -46,60 +94,70 @@ and ask what a tool should honestly do with it. The answer this repository
 asserts is: nothing, and say so. That is `NO_RUNNABLE_CHECK`, and it is not a
 success.
 
+Then read [`issues/17-tag-filter-hangs-the-browser-tab.md`](issues/17-tag-filter-hangs-the-browser-tab.md),
+which is filed as a slow page by somebody who does not know what a catastrophic
+backtrack is. Reproducing the symptom and reporting "the tag filter is slow"
+would be reproducing it and missing what it is.
+
 ## Layout
 
 | Path | What it holds |
 | --- | --- |
-| `src/` | The application. Ten seeded defects live in here. |
-| `test/` | The repository's own suite. Green, and green honestly -- it simply does not cover the buggy paths, which is why the bugs are there. |
+| `src/` | The application. Ten seeded defects and four seeded vulnerabilities live in here. |
+| `test/` | The repository's own suite. Green, and green honestly -- it simply does not cover the defective paths, which is why the defects survive it. |
 | `repro/` | One reproduction per real defect. **Red on purpose.** Not run by `npm test`. |
-| `negative/` | The reproductions for the two cases with no defect in them. Green. |
-| `issues/` | Fourteen bug reports, one per case. |
+| `negative/` | The reproductions for the three cases with nothing to fix. Green. |
+| `issues/` | Nineteen bug reports, one per case. |
 | `SEEDED.md` | The manifest: defect, report, correct reproduction, expected Credda outcome. |
 
 ## Running Credda against it
 
-[`.github/workflows/credda.yml`](.github/workflows/credda.yml) is ready to
-run: a `triage` job on opened issues and an `investigate` job on the `credda`
-label, `contents: read` and `issues: write` and nothing else.
+[`.github/workflows/credda.yml`](.github/workflows/credda.yml) is ready to run:
+a `triage` job on opened issues and an `investigate` job on the `credda` label,
+`contents: read` and `issues: write` and nothing else.
 
-> **The action reference, as of 2026-08-27.** Both `uses:` lines now point at
+> **The action reference, as of 2026-08-27.** Both `uses:` lines point at
 > `Credda-io/action@v1`, and that resolves: the repository is public and the
-> `v1` tag exists. It previously said `codereefai/codereef-action@v1`, which
-> was never a real repository under either organisation -- the action lives in
-> a repository called `action`, not `codereef-action`, so that reference was
-> wrong in the name as well as the owner and would not have resolved even
-> before the rename.
+> `v1` tag exists. It previously said `codereefai/codereef-action@v1`, which was
+> never a real repository under either organisation -- the action lives in a
+> repository called `action`, not `codereef-action`, so that reference was wrong
+> in the name as well as the owner and would not have resolved even before the
+> rename.
 >
-> Two things are still worth knowing rather than assuming. The action carries
-> no published GitHub Release, only the tag, so `@v1` is a moving reference:
-> **pin a commit SHA** if you need this workflow to keep meaning one thing.
-> And by its own README the install path is proven end to end while
-> `investigate` -- sandbox, reproduction, report -- is not proven outside
-> Credda's own repositories; treat the first investigation here as an
-> experiment rather than a service.
+> Two things are worth knowing rather than assuming. The action carries no
+> published GitHub Release, only the tag, so `@v1` is a moving reference: **pin
+> a commit SHA** if you need this workflow to keep meaning one thing. And by its
+> own README the install path is proven end to end while `investigate` --
+> sandbox, reproduction, report -- is not proven outside Credda's own
+> repositories. Treat the first investigation here as an experiment rather than
+> a service.
 
-To try it: paste the body of any file in `issues/` into a new
-issue in your fork, then add the `credda` label.
+To try it: paste the body of any file in `issues/` into a new issue in your
+fork, then add the `credda` label.
 
 ```bash
 gh label create credda \
   --description 'Credda reproduces this bug in a sandbox and comments what it established.'
 ```
 
-An `ANTHROPIC_API_KEY` secret is optional. Without one the deterministic
-heuristic provider runs: it reproduces and reports, and cannot reason over
-prose. Several reports here are deliberately prose-heavy, so the difference is
-visible.
+An `ANTHROPIC_API_KEY` secret is optional; see the status note above for what
+changes with and without one.
 
 ## Please do not
 
-- Copy any of `src/` into something real. It is wrong on purpose.
-- Fix a seeded defect and merge it. CI has a job that fails if `repro/` ever
-  goes green, and `SEEDED.md` would then be lying.
-- Read the reports as a style guide for filing issues. They are deliberately
-  uneven -- some are vague, one references a module that does not exist, and one
-  is about behaviour that is working as designed.
+- **Copy any of `src/` into something real.** It is wrong on purpose, and four
+  of the wrong parts are exploitable.
+- **Fix a seeded defect and merge it.** CI has a job that fails if `repro/` ever
+  goes green, and `SEEDED.md` would then be lying. If you have found a defect
+  that is *not* in `SEEDED.md`, that is a different and genuinely welcome thing
+  -- see [CONTRIBUTING.md](CONTRIBUTING.md).
+- **Read the reports as a style guide for filing issues.** They are deliberately
+  uneven: some are vague, one references a module that does not exist, one is
+  about behaviour that is working as designed, and one is a security report with
+  nothing behind it.
+- **Report the seeded vulnerabilities as a security finding against Credda.**
+  They are the exhibit. [SECURITY.md](SECURITY.md) says what to do with a
+  vulnerability that is genuinely ours.
 
 ## Licence
 

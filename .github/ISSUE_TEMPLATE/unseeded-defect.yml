@@ -1,0 +1,43 @@
+name: A defect that is not in SEEDED.md
+description: The application is wrong in a way nobody intended.
+labels: [unseeded]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Check [SEEDED.md](../../SEEDED.md) first.** Nineteen cases are
+        deliberate — ten bugs, four vulnerabilities, five reports that should
+        produce nothing. Those are the exhibit and they will not be fixed.
+
+        What is welcome is a defect nobody intended, in a repository whose whole
+        claim is that it knows what is wrong with it. That is a real finding.
+  - type: checkboxes
+    id: checked
+    attributes:
+      label: Before filing
+      options:
+        - label: I have read SEEDED.md and this is not one of the nineteen.
+          required: true
+        - label: I understand the seeded defects will not be fixed.
+          required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong
+      description: What you did, what you expected, what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: A reproduction, if you have one
+      description: >
+        A test in the style of `repro/` is ideal. If you do not have one, say so
+        — a report without a reproduction is still worth filing here.
+      render: typescript
+  - type: markdown
+    attributes:
+      value: |
+        If you want to propose a *new* deliberate case rather than report an
+        accidental one, [CONTRIBUTING.md](../../CONTRIBUTING.md) says what one
+        has to come with.

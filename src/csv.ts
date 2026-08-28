@@ -35,3 +35,23 @@ export function parseInventory(text: string): ItemSeed[] {
     };
   });
 }
+
+/**
+ * Write the inventory back out in the same shape `parseInventory` reads.
+ *
+ * The desk exports this weekly and opens it in a spreadsheet to do the stock
+ * count. Names containing a comma or a quote are quoted and their quotes are
+ * doubled, which is what every spreadsheet expects.
+ *
+ * ONE OF THE SEEDED VULNERABILITIES IS HERE. See ../SEEDED.md, case 18.
+ */
+export function exportInventory(items: readonly ItemSeed[]): string {
+  const cell = (value: string): string =>
+    /[",]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+
+  const rows = items.map((item) =>
+    [cell(item.id), cell(item.name), cell((item.tags ?? []).join(';')), String(item.copies ?? 0)].join(','),
+  );
+
+  return ['id,name,tags,copies', ...rows].join('\n');
+}

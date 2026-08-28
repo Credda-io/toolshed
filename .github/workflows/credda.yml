@@ -11,9 +11,12 @@
 #                out, reproduces the reported failure in a sandbox, and comments
 #                what it established -- leading with what it did not.
 #
-# Credda writes no code and opens no pull request. `contents: read` and
-# `issues: write` is the whole permission set; if you fork this and it asks for
-# more, that is the fork's decision.
+# STATUS, 2026-08-27: the reporting stages run today; the fix stage runs when a
+# model-backed provider is configured, and pull request authoring is not yet
+# wired up. So this workflow comments and does not push a branch, and
+# `contents: read` plus `issues: write` is the whole permission set it needs.
+# If a later version of the action asks for more than that, read the diff before
+# granting it -- a workflow that can write to `contents` can write to `main`.
 #
 # BEFORE YOU RUN THIS, create the label once:
 #

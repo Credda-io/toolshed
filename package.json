@@ -2,8 +2,17 @@
   "name": "toolshed",
   "version": "0.1.0",
   "private": true,
-  "description": "A deliberately bug-seeded community tool-lending library. Demo corpus for Credda.",
+  "description": "A deliberately defective community tool-lending library: ten seeded bugs, four seeded vulnerabilities, and five reports that should produce nothing. The demo corpus for Credda.",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/Credda-io/toolshed#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Credda-io/toolshed.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Credda-io/toolshed/issues"
+  },
+  "author": "Credda (https://credda.io)",
   "type": "module",
   "engines": {
     "node": ">=20"
