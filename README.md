@@ -28,8 +28,13 @@ wrong on purpose.
 [Credda](https://credda.io) takes a bug report or security vulnerability a
 customer has labelled, reproduces the failure, diagnoses the cause, writes the
 patch, proves it with a test that fails before and passes after, and hands back
-a diff. It runs in your own CI. Delivering that diff as a pull request is
-opt-in and off by default. It proposes and never merges.
+a diff. It runs in your own CI. Whether that diff becomes a
+pull request depends on which mechanism delivered it, and the two answer
+differently: the **GitHub App** path opens one with no flag and no switch, for a
+run that reaches `READY_FOR_REVIEW` with a proven verdict; the **GitHub Action**
+opens none unless you set its `open-pull-request` input, which defaults to
+`false`. How often a run reaches a proven fix at all has not been measured. It
+proposes and never merges.
 
 Toolshed is the repository you point it at when you want to see that for
 yourself, on defects whose answers are written down in advance.
