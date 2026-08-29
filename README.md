@@ -25,11 +25,11 @@ wrong on purpose.
 
 ## What it has to do with Credda
 
-[Credda](https://credda.io) finds the bugs and security vulnerabilities in a
-company's production and QA environments, reproduces the failure, diagnoses the
-cause, writes the patch, proves it with a test that fails before and passes
-after, and opens a pull request. It runs in your own CI. It proposes and never
-merges.
+[Credda](https://credda.io) takes a bug report or security vulnerability a
+customer has labelled, reproduces the failure, diagnoses the cause, writes the
+patch, proves it with a test that fails before and passes after, and hands back
+a diff. It runs in your own CI. Delivering that diff as a pull request is
+opt-in and off by default. It proposes and never merges.
 
 Toolshed is the repository you point it at when you want to see that for
 yourself, on defects whose answers are written down in advance.
@@ -42,14 +42,14 @@ deliberately prose-heavy, which is where the difference between the two
 providers is easiest to see.
 
 This paragraph said, on 2026-08-27, that pull request authoring was not wired up
-and that a run here comments rather than opening a PR. Half of that has moved:
-the engine's delivery path was wired on 2026-08-28 and opens a pull request for
-a run that reaches a proven verdict, so a run against this repository through
-the engine's GitHub App can now arrive as a diff. What has not moved is the
-launcher: the GitHub Action asks for no write scopes and still comments, by
-design, so a run driven from CI leaves a comment here and nothing else. Which
-one you get depends on how the run reached this repository, and that is worth
-knowing before you read a result as a verdict on the engine.
+and that a run here comments rather than opening a PR. Some of that has moved:
+the delivery path was wired on 2026-08-28, and the GitHub Action now has an
+`open-pull-request` input which, when a caller turns it on, commits a verified
+patch and opens a pull request. It is off by default -- a default install still
+asks for no write scopes and still comments -- and it has not yet run against a
+real repository, this one included. So a run here leaves a comment unless you
+deliberately turned delivery on, and that is worth knowing before you read a
+result as a verdict on the engine.
 
 ## Why the corpus is shaped the way it is
 
