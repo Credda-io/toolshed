@@ -14,17 +14,21 @@
 # STATUS, 2026-08-29: the reporting stages run today; the fix stage runs when a
 # model-backed provider is configured. This block said, until today, that pull
 # request authoring was not yet wired up. It is: the delivery path was wired on
-# 2026-08-28 and the action takes an `open-pull-request` input. It is off unless
-# a caller turns it on, and this workflow does not, so the behaviour below is
-# unchanged -- it comments and pushes no branch. The reason is now "we did not
-# opt in" rather than "the feature does not exist", which is the difference that
-# matters when you are deciding what to grant.
+# 2026-08-28 and the action grows an `open-pull-request` input -- on the
+# action's unmerged branch, not at the `@v1` this workflow pins and not on its
+# default branch, so no version reachable from here accepts that input at all.
+# Either way the behaviour below is unchanged: it comments and pushes no
+# branch. The reason is now "we did not opt in" rather than "the feature does
+# not exist", which is the difference that matters when you are deciding what
+# to grant.
 #
-# `contents: read` plus `issues: write` is the whole permission set this needs,
-# and turning delivery on would mean granting `contents: write` and
-# `pull-requests: write` here deliberately. If a later version of the action
-# asks for more than that on its own, read the diff before granting it -- a
-# workflow that can write to `contents` can write to `main`.
+# `contents: read`, `issues: write` and `id-token: write` is the whole
+# permission set this needs. The third mints the OIDC token the action's
+# launcher presents to fetch the engine; it grants no access to anything of
+# this repository's. Turning delivery on would mean granting `contents: write`
+# and `pull-requests: write` here deliberately. If a later version of the
+# action asks for more than that on its own, read the diff before granting it
+# -- a workflow that can write to `contents` can write to `main`.
 #
 # BEFORE YOU RUN THIS, create the label once:
 #
@@ -51,6 +55,7 @@ on:
 permissions:
   contents: read # checkout of the repository under test
   issues: write # the one report comment
+  id-token: write # mint the OIDC token the action's launcher fetches the engine with
 
 jobs:
   triage:
@@ -69,6 +74,12 @@ jobs:
       - uses: Credda-io/action@v1
         with:
           mode: triage
+          # Passed explicitly, not left to the default. At `@v1` the action's
+          # `label` default is `codereef`, so without this line triage would
+          # stay quiet for the wrong name -- and an issue opened already
+          # carrying `credda` would get a triage note on top of the
+          # investigation that is about to run on it.
+          label: credda
 
   investigate:
     if: github.event.action == 'labeled' && github.event.label.name == 'credda'
@@ -81,6 +92,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: Credda-io/action@v1
         with:
+          # Passed explicitly, not left to the default, and this is the whole
+          # reason the line exists. The action re-checks the applied label
+          # against this input as defence in depth. At `@v1` the default is
+          # `codereef`, so a job triggered by the `credda` label above would
+          # enter the action, fail that re-check, and EXIT 0 -- a green job
+          # that did nothing, with no red anywhere to notice it by. The
+          # default only became `credda,codereef` after the tag was cut.
+          label: credda
           # Optional. Without a key the deterministic heuristic provider runs:
           # it reproduces and reports, and cannot reason over prose. Several of
           # the seeded reports in issues/ are prose-heavy, so a key makes the

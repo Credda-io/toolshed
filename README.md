@@ -188,7 +188,9 @@ would be reproducing it and missing what it is.
 
 [`.github/workflows/credda.yml`](.github/workflows/credda.yml) is ready to run:
 a `triage` job on opened issues and an `investigate` job on the `credda` label,
-`contents: read` and `issues: write` and nothing else.
+`contents: read` and `issues: write` and `id-token: write` and nothing else.
+The third mints the OIDC token the action's launcher fetches the engine with;
+it grants no access to anything of this repository's.
 
 > **The action reference, as of 2026-08-27.** Both `uses:` lines point at
 > `Credda-io/action@v1`, and that resolves: the repository is public and the
@@ -198,7 +200,13 @@ a `triage` job on opened issues and an `investigate` job on the `credda` label,
 > in the name as well as the owner and would not have resolved even before the
 > rename.
 >
-> Two things are worth knowing rather than assuming. The action carries no
+> Both `uses:` lines also pass `label: credda` explicitly rather than relying
+> on the action's default. At `@v1` that default is `codereef`, and the action
+> re-checks the applied label against it, so a job triggered by the `credda`
+> label would enter the action, fail that re-check, and **exit 0** -- green,
+> and having done nothing. Copy the `label:` line along with the rest.
+>
+> Two more things are worth knowing rather than assuming. The action carries no
 > published GitHub Release, only the tag, so `@v1` is a moving reference: **pin
 > a commit SHA** if you need this workflow to keep meaning one thing. And by its
 > own README the install path is proven end to end while `investigate` --
