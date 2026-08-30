@@ -17,7 +17,20 @@
  *   2. the counts in the file's own summary -- nineteen, ten, four, five --
  *      match the numbers in it;
  *   3. the suite sizes it publishes under "How to check this file is still
- *      true" match the files in `test/`, `repro/` and `negative/`.
+ *      true" -- BOTH the file counts and the test counts -- match `test/`,
+ *      `repro/` and `negative/`.
+ *
+ * The test counts were the gap. Only the `(\d+) files` capture was read, so
+ * `56 tests` and `3 tests` were prose: adding `.skip` to the single `it` in
+ * `negative/19-search-has-no-database.test.ts`, or deleting an `it` from
+ * `test/`, left every file count right, every suite exiting 0, and this script
+ * green, while SEEDED.md and README.md ("56 green, 28 red, 3 green -- is
+ * checked by CI on every push") had both become false. Only the 28 was
+ * checked, by `check-repro-red.mjs`, which counts what it collects.
+ *
+ * The counts come from `vitest list`, which COLLECTS without running -- so
+ * `repro/`, whose whole purpose is to fail, can be counted here as cheaply as
+ * the two suites that pass, and a skipped test is still absent from the list.
  *
  * It is a script rather than a test in `test/` on purpose. `test/` is this
  * repository's ordinary-looking application suite -- it is part of what a tool
@@ -26,6 +39,7 @@
  * Exits non-zero on any mismatch, and prints every one rather than the first.
  */
 
+import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -78,19 +92,61 @@ if (total !== reports.length) problems.push(`${reports.length} reports in issues
 if (!seeded.includes('Nineteen cases')) problems.push('SEEDED.md no longer opens with "Nineteen cases"');
 if (reports.length !== 19) problems.push(`issues/ holds ${reports.length} reports; SEEDED.md says nineteen`);
 
-// 3. The published suite sizes.
+// 3. The published suite sizes: files, and the tests inside them.
+//
+// `vitest list` collects and prints the tests it would run, without running
+// any. A `.skip`ped test is not listed, which is the point: skipping is how a
+// count falls silently while every suite still exits 0.
+const collected = (dir) => {
+  const out = execFileSync('npx', ['vitest', 'list', '--dir', dir, '--json'], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+    maxBuffer: 32 * 1024 * 1024,
+  });
+  const listed = JSON.parse(out);
+  if (!Array.isArray(listed)) throw new Error(`vitest list --dir ${dir} did not answer an array`);
+  return listed.length;
+};
+
 for (const [dir, suffix, label] of [
   ['test', '.test.ts', 'npm test'],
   ['repro', '.repro.test.ts', 'npm run repro'],
   ['negative', '.test.ts', 'npm run negative'],
 ]) {
-  // `test/` also holds fixture modules, which are not suites.
-  const files = list(dir, suffix).filter((f) => !f.includes('fixtures'));
+  // The suffix already excludes `test/`'s fixture modules, which are plain
+  // `.ts`. A `!f.includes('fixtures')` filter used to stand here as well and
+  // could never fire -- a no-op reading as an exclusion.
+  const files = list(dir, suffix);
   const line = seeded.match(new RegExp(`${label.replace(/ /g, '\\s+')}\\s+#\\s+(\\d+) files`));
   if (line === null) {
     problems.push(`SEEDED.md no longer publishes a file count for \`${label}\``);
   } else if (Number(line[1]) !== files.length) {
     problems.push(`${dir}/ holds ${files.length} suites; SEEDED.md says ${line[1]}`);
+  }
+
+  const claimed = seeded.match(new RegExp(`${label.replace(/ /g, '\\s+')}\\s+#[^\\n]*?(\\d+) tests`));
+  if (claimed === null) {
+    problems.push(`SEEDED.md no longer publishes a test count for \`${label}\``);
+    continue;
+  }
+  const counted = collected(dir);
+  if (counted === 0) {
+    problems.push(`vitest collected no tests at all in ${dir}/, so this count checked nothing`);
+  } else if (counted !== Number(claimed[1])) {
+    problems.push(`${dir}/ collects ${counted} tests; SEEDED.md says ${claimed[1]}`);
+  }
+}
+
+// README.md publishes the same three numbers as one sentence, and says CI
+// checks them. It does now.
+const ground = seeded.match(/npm test\s+#\s+\d+ files, (\d+) tests/);
+const red = seeded.match(/npm run repro\s+#\s+\d+ files, (\d+) tests/);
+const green = seeded.match(/npm run negative\s+#\s+\d+ files, (\d+) tests/);
+if (ground && red && green) {
+  const sentence = `${ground[1]} green, ${red[1]} red, ${green[1]} green`;
+  if (!read('README.md').includes(sentence)) {
+    problems.push(`README.md no longer says "${sentence}", which is what SEEDED.md publishes`);
   }
 }
 
@@ -98,4 +154,7 @@ if (problems.length > 0) {
   for (const problem of problems) console.error(`SEEDED.md is out of date: ${problem}`);
   process.exit(1);
 }
-console.log(`SEEDED.md describes the tree: ${String(reports.length)} reports, all accounted for.`);
+console.log(
+  `SEEDED.md describes the tree: ${String(reports.length)} reports, all accounted for, and the ` +
+    'three suite sizes it publishes -- files AND tests -- are the files and the tests on disk.',
+);
