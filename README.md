@@ -4,8 +4,8 @@
 [![defects: deliberate](https://img.shields.io/badge/defects-deliberate-critical)](SEEDED.md)
 [![do not deploy](https://img.shields.io/badge/do%20not-deploy-critical)](SECURITY.md)
 
-**A repository with known defects in it, so you can check whether a tool finds
-them.**
+**A repository with known defects in it, and a filed report for each one, so you
+can check what a tool does with the report.**
 
 Toolshed is a small community tool-lending library, in TypeScript. Members
 borrow tools, tools come back late, somebody queues for the good router. It is
@@ -13,7 +13,7 @@ an ordinary-looking application with an ordinary-looking green test suite, and
 **every defect in it is deliberate**: ten bugs, four exploitable
 vulnerabilities, and five reports that should not produce a patch at all.
 
-It exists because evaluating a bug-finding tool on your own repository is
+It exists because evaluating a tool of this kind on your own repository is
 circular -- you do not know what is in there either. Here you do. There are
 nineteen bug reports in [`issues/`](issues/), and
 [`SEEDED.md`](SEEDED.md) says, for every one of them, what the defect is, where
@@ -108,7 +108,7 @@ because "we also have a demo repo" is not a reason.
    nineteen here are exactly those, and three of them ship a passing proof.
 2. **Reports that should produce nothing at all.** Same reason, stated as the
    thing that matters: a corpus of confirmed defects can measure how often
-   Credda finds one, and cannot measure how often it invents one. That is the
+   Credda reproduces one, and cannot measure how often it invents one. That is the
    failure this product cannot afford, and `negative/` is where it is measured.
 3. **Vulnerabilities.** Four, each with a CWE, each reachable from text a member
    of the public can supply, and each filed by a reporter who does not know what

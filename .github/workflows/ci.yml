@@ -29,6 +29,10 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # SEEDED.md is the answer key a tool is judged against. This fails if a
+      # report was added, renamed or removed without it, or if the counts it
+      # publishes stopped matching the directories.
+      - run: npm run check:seeded
 
   # Proof that the seeded defects are still seeded. This job PASSES when the
   # repro suite FAILS: a green repro run means somebody fixed a bug the demo
