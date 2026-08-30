@@ -120,13 +120,16 @@ npm test          # 9 files, 56 tests, all pass. The repository's own suite.
 npm run repro     # 14 files, 28 tests, ALL FAIL. One file per real defect.
 npm run negative  # 3 files, 3 tests, all pass. Cases 13, 14 and 19.
 npm run check:seeded   # this file still describes the files on disk.
+npm run check:repro-red  # EVERY reproduction above is still red, one by one.
 ```
 
-`.github/workflows/ci.yml` enforces all four, including that `repro/` stays
-red. If a seeded defect is ever fixed, that job fails and this file has to be
-updated to match.
+`.github/workflows/ci.yml` enforces all five. If a seeded defect is ever fixed,
+`check:repro-red` names the file it was fixed in and this file has to be updated
+to match. It replaced a check that only required `npm run repro` to exit
+non-zero, which one red reproduction out of fourteen was enough to satisfy --
+so a single defect could quietly stop being one.
 
-The first three catch a defect that stopped being one. `check:seeded` catches
+The first four catch a defect that stopped being one. `check:seeded` catches
 the other direction, which they cannot see: a case added, renamed or removed
 without this file moving with it. An answer key that has quietly stopped listing
 a report is worse than a missing one -- the report is still in `issues/` for a

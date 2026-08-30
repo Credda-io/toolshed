@@ -22,7 +22,8 @@
     "repro": "vitest run --dir repro",
     "negative": "vitest run --dir negative",
     "typecheck": "tsc --noEmit",
-    "check:seeded": "node scripts/check-seeded.mjs"
+    "check:seeded": "node scripts/check-seeded.mjs",
+    "check:repro-red": "node scripts/check-repro-red.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",
