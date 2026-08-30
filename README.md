@@ -85,6 +85,63 @@ suite asserts is correct. One is a member misremembering. One is a careful
 security report with no vulnerability behind it. Declining these is the harder
 half of the work, and `SEEDED.md` states which decline each one deserves.
 
+## What this is for, now that there is a real corpus
+
+Credda is measured against a harvested corpus: real defects taken from real
+repositories, each pinned to the commit before its fix, each admitted only after
+the reported expression was executed at that commit and at the fix and behaved
+differently. That corpus is much larger than this one and every case in it is
+real. It is the honest measurement, and this repository is not a substitute for
+it.
+
+So the question this section exists to answer is whether nineteen hand-written
+cases still teach anything. They do, and it is worth being specific about what,
+because "we also have a demo repo" is not a reason.
+
+**Four things this corpus holds that a harvested one structurally cannot:**
+
+1. **The outcomes that are not reproductions.** A harvested corpus is built by
+   admitting cases where the defect is present, so every case in it is a defect.
+   `NO_RUNNABLE_CHECK`, `NO_CHANGE_REQUIRED` and `CONTRADICTS_SPECIFICATION` have
+   no cases there by construction — a report with nothing runnable in it never
+   survives an admission gate that requires something runnable. Five of the
+   nineteen here are exactly those, and three of them ship a passing proof.
+2. **Reports that should produce nothing at all.** Same reason, stated as the
+   thing that matters: a corpus of confirmed defects can measure how often
+   Credda finds one, and cannot measure how often it invents one. That is the
+   failure this product cannot afford, and `negative/` is where it is measured.
+3. **Vulnerabilities.** Four, each with a CWE, each reachable from text a member
+   of the public can supply, and each filed by a reporter who does not know what
+   they have found. A harvested corpus of library defects contains bugs in
+   security-adjacent code; it does not contain reachable vulnerabilities with the
+   severity deliberately left out of the report.
+4. **Defect shapes that are not one expression.** A harvested case is admitted by
+   executing an expression and comparing values, so what it can hold is what one
+   expression can show. Async ordering
+   ([`issues/05`](issues/05-nightly-reminders-report-zero.md)), a missing sort
+   comparator ([`issues/09`](issues/09-annual-report-largest-bin-wrong.md)) and a
+   shared mutable default that only appears across two objects
+   ([`issues/10`](issues/10-tagging-one-tool-tags-all-of-them.md)) each need
+   several calls and some state before they say anything.
+
+**And one thing that is about cost rather than coverage.** Running the harvested
+corpus clones repositories, installs their dependency trees at commits from
+several years ago, and spends real money on a model provider. Running this one
+needs none of that. `npm test`, `npm run repro` and `npm run negative` are local
+`vitest`, this repository has no runtime dependencies, and its ground truth —
+56 green, 28 red, 3 green — is checked by CI on every push for free. That is
+what makes it usable as a demonstration and as a smoke test, and it is a real
+answer rather than a consolation one.
+
+**What it cannot do, and what the harvested corpus is for.** Every expectation
+in `SEEDED.md` was written by the same people who wrote the defects, which makes
+it a test of whether Credda agrees with them rather than a test of whether it is
+right. Nothing here measures how often real inbound is gradeable at all, and
+nothing here is prose from somebody with no idea Credda exists. Those are
+measurements, and they need real reports and a fix commit nobody here authored.
+This repository is not evidence about Credda's accuracy and should never be
+quoted as any.
+
 ## Five minutes
 
 ```bash
