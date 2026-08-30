@@ -138,6 +138,85 @@ for (const [dir, suffix, label] of [
   }
 }
 
+// 4. The pointers into the code, which were prose.
+//
+// Every row of the two defect tables carries a `Where` cell naming the file and
+// the function the defect is in, several rows name a suite file, case 14 quotes
+// the title of a test in `test/holds.test.ts`, and case 12's whole answer is
+// the claim that `src/pricing.js`, `priceLoan` and `buildLoanFixture` exist
+// nowhere here. None of that was checked. Renaming `lateFee`, moving a
+// reproduction, retitling the holds test, or adding a `priceLoan` export would
+// each leave the answer key confidently wrong with every suite still green --
+// and case 12 is the one that fails quietly in the direction that matters: the
+// moment something in this repository IS called `priceLoan`, the correct answer
+// for that report stops being `NO_RUNNABLE_CHECK` and nothing would say so.
+
+/** Every `dir/file` path SEEDED.md points at, whatever the directory. */
+const referenced = new Set(
+  (seeded.match(/`(?:src|test|repro|negative|scripts)\/[A-Za-z0-9._/-]+`/g) ?? []).map((m) => m.slice(1, -1)),
+);
+for (const path of referenced) {
+  const [dir, name] = [path.slice(0, path.indexOf('/')), path.slice(path.indexOf('/') + 1)];
+  // `repro/16` is the file whose name starts with 16; the prose uses that
+  // shorthand deliberately, so a prefix counts as naming the file.
+  const exists = readdirSync(join(root, dir)).some((entry) => entry === name || entry.startsWith(`${name}-`));
+  if (!exists) problems.push(`SEEDED.md points at ${path}, which does not exist`);
+}
+
+/*
+ * The `Where` cell of a defect row: backticked spans, the `src/...` ones being
+ * files and the rest being names that file has to declare. `renew` in
+ * `src/loans.ts` `renew`, `src/policy.ts` belongs to the file before it, which
+ * is why the file is carried forward rather than assumed.
+ */
+for (const row of seeded.match(/^\| \d\d \|[^\n]*$/gm) ?? []) {
+  const cells = row.split('|').map((cell) => cell.trim());
+  const where = cells.find((cell) => /^`src\//.test(cell));
+  if (where === undefined) continue; // A refusal row names no code, by design.
+  let file = null;
+  for (const span of where.match(/`[^`]+`/g) ?? []) {
+    const text = span.slice(1, -1);
+    if (text.startsWith('src/')) {
+      file = text;
+      continue;
+    }
+    if (file === null) continue;
+    let source;
+    try {
+      source = readFileSync(join(root, file), 'utf8');
+    } catch {
+      continue; // Already reported above.
+    }
+    if (!new RegExp(`\\b(?:function|const|class|let)\\s+${text}\\b`).test(source)) {
+      problems.push(`SEEDED.md says the defect is in \`${text}\` in ${file}, which declares no such name`);
+    }
+  }
+}
+
+/*
+ * Case 12 is `NO_RUNNABLE_CHECK` because these three do not exist. If one ever
+ * does, the report becomes runnable and the answer key is wrong about it.
+ */
+const sources = ['src', 'test', 'repro', 'negative']
+  .flatMap((dir) => list(dir, '.ts').map((name) => `${dir}/${name}`))
+  .map((path) => read(path))
+  .join('\n');
+for (const absent of ['priceLoan', 'buildLoanFixture', 'pricing']) {
+  if (new RegExp(`\\b${absent}\\b`).test(sources)) {
+    problems.push(
+      `SEEDED.md answers case 12 with NO_RUNNABLE_CHECK because \`${absent}\` exists nowhere here; it now exists`,
+    );
+  }
+}
+
+/* Case 14's answer is a quotation from the green suite. */
+const quoted = 'refuses a hold on an item the member already has on loan';
+if (!seeded.includes(quoted)) {
+  problems.push(`SEEDED.md no longer quotes the holds test by title, so case 14 cites nothing`);
+} else if (!read('test/holds.test.ts').includes(quoted)) {
+  problems.push(`SEEDED.md cites a test titled "${quoted}"; test/holds.test.ts has no such test`);
+}
+
 // README.md publishes the same three numbers as one sentence, and says CI
 // checks them. It does now.
 const ground = seeded.match(/npm test\s+#\s+\d+ files, (\d+) tests/);

@@ -131,6 +131,13 @@ so a single defect could quietly stop being one.
 
 The first four catch a defect that stopped being one. `check:seeded` catches
 the other direction, which they cannot see: a case added, renamed or removed
-without this file moving with it. An answer key that has quietly stopped listing
+without this file moving with it. It also checks the pointers in this file that
+were prose until 2026-08-30 -- every `src/`, `test/`, `repro/` and `negative/`
+path it names, every function named in a `Where` cell, the test title case 14
+quotes out of `test/holds.test.ts`, and case 12's answer, which is the claim
+that `priceLoan`, `buildLoanFixture` and a pricing module exist nowhere here.
+That last one fails in the direction that matters: the day something here IS
+called `priceLoan`, case 12 stops being `NO_RUNNABLE_CHECK` and the answer key
+would otherwise go on saying it is. An answer key that has quietly stopped listing
 a report is worse than a missing one -- the report is still in `issues/` for a
 tool to pick up, and nothing says what the right answer is.
