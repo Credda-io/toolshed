@@ -57,7 +57,7 @@ jobs:
     steps:
       # Optional in triage mode. With it, a refusal can say "this repository
       # holds no src/pricing.ts" instead of staying quiet.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: Credda-io/action@v1
         with:
           mode: triage
@@ -70,7 +70,7 @@ jobs:
       group: credda-issue-${{ github.event.issue.number }}
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: Credda-io/action@v1
         with:
           # Optional. Without a key the deterministic heuristic provider runs:
