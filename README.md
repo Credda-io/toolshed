@@ -4,8 +4,8 @@
 [![defects: deliberate](https://img.shields.io/badge/defects-deliberate-critical)](SEEDED.md)
 [![do not deploy](https://img.shields.io/badge/do%20not-deploy-critical)](SECURITY.md)
 
-**A repository with known defects in it, so you can check whether a tool finds
-them.**
+**A repository with known defects in it, and a filed report for each one, so you
+can check what a tool does with the report.**
 
 Toolshed is a small community tool-lending library, in TypeScript. Members
 borrow tools, tools come back late, somebody queues for the good router. It is
@@ -13,7 +13,7 @@ an ordinary-looking application with an ordinary-looking green test suite, and
 **every defect in it is deliberate**: ten bugs, four exploitable
 vulnerabilities, and five reports that should not produce a patch at all.
 
-It exists because evaluating a bug-finding tool on your own repository is
+It exists because evaluating a tool of this kind on your own repository is
 circular -- you do not know what is in there either. Here you do. There are
 nineteen bug reports in [`issues/`](issues/), and
 [`SEEDED.md`](SEEDED.md) says, for every one of them, what the defect is, where
@@ -25,11 +25,21 @@ wrong on purpose.
 
 ## What it has to do with Credda
 
-[Credda](https://credda.io) finds the bugs and security vulnerabilities in a
-company's production and QA environments, reproduces the failure, diagnoses the
-cause, writes the patch, proves it with a test that fails before and passes
-after, and opens a pull request. It runs in your own CI. It proposes and never
-merges.
+[Credda](https://credda.io) takes a bug report or security vulnerability a
+customer has labelled, reproduces the failure, diagnoses the cause, writes the
+patch, proves it with a test that fails before and passes after, and hands back
+a diff. It runs in your own CI. Whether that diff becomes a
+pull request depends on which mechanism delivered it, and the two answer
+differently: the **GitHub App** path opens one with no flag and no switch, for a
+run that reaches `READY_FOR_REVIEW` with a proven verdict; the **GitHub Action**
+opens none unless you set its `open-pull-request` input, which defaults to
+`false`, **and** add `contents: write` and `pull-requests: write` to your own
+workflow's `permissions:` block, which a default install does not grant. Turning
+the input on without both scopes fails at that step rather than opening
+anything -- and at `Credda-io/action@v1`, the tag this repository pins, that
+input does not exist on any reachable version, so here there is nothing yet to
+turn on. How often a run reaches a proven fix at all has not been measured. It
+proposes and never merges.
 
 Toolshed is the repository you point it at when you want to see that for
 yourself, on defects whose answers are written down in advance.
@@ -42,14 +52,16 @@ deliberately prose-heavy, which is where the difference between the two
 providers is easiest to see.
 
 This paragraph said, on 2026-08-27, that pull request authoring was not wired up
-and that a run here comments rather than opening a PR. Half of that has moved:
-the engine's delivery path was wired on 2026-08-28 and opens a pull request for
-a run that reaches a proven verdict, so a run against this repository through
-the engine's GitHub App can now arrive as a diff. What has not moved is the
-launcher: the GitHub Action asks for no write scopes and still comments, by
-design, so a run driven from CI leaves a comment here and nothing else. Which
-one you get depends on how the run reached this repository, and that is worth
-knowing before you read a result as a verdict on the engine.
+and that a run here comments rather than opening a PR. Some of that has moved:
+the delivery path was wired on 2026-08-28, and the GitHub Action grows an
+`open-pull-request` input which, when a caller turns it on, commits a verified
+patch and opens a pull request. As of 2026-08-29 that input lives on the
+action's unmerged branch -- not at `@v1` and not on its default branch -- so no
+version this workflow can reach accepts it. It is off by default in any case, a
+default install asks for no write scopes and still comments, and it has not yet
+run against a real repository, this one included. So a run here leaves a comment unless you
+deliberately turned delivery on, and that is worth knowing before you read a
+result as a verdict on the engine.
 
 ## Why the corpus is shaped the way it is
 
@@ -76,6 +88,63 @@ module that does not exist. One describes behaviour the repository's own green
 suite asserts is correct. One is a member misremembering. One is a careful
 security report with no vulnerability behind it. Declining these is the harder
 half of the work, and `SEEDED.md` states which decline each one deserves.
+
+## What this is for, now that there is a real corpus
+
+Credda is measured against a harvested corpus: real defects taken from real
+repositories, each pinned to the commit before its fix, each admitted only after
+the reported expression was executed at that commit and at the fix and behaved
+differently. That corpus is much larger than this one and every case in it is
+real. It is the honest measurement, and this repository is not a substitute for
+it.
+
+So the question this section exists to answer is whether nineteen hand-written
+cases still teach anything. They do, and it is worth being specific about what,
+because "we also have a demo repo" is not a reason.
+
+**Four things this corpus holds that a harvested one structurally cannot:**
+
+1. **The outcomes that are not reproductions.** A harvested corpus is built by
+   admitting cases where the defect is present, so every case in it is a defect.
+   `NO_RUNNABLE_CHECK`, `NO_CHANGE_REQUIRED` and `CONTRADICTS_SPECIFICATION` have
+   no cases there by construction — a report with nothing runnable in it never
+   survives an admission gate that requires something runnable. Five of the
+   nineteen here are exactly those, and three of them ship a passing proof.
+2. **Reports that should produce nothing at all.** Same reason, stated as the
+   thing that matters: a corpus of confirmed defects can measure how often
+   Credda reproduces one, and cannot measure how often it invents one. That is the
+   failure this product cannot afford, and `negative/` is where it is measured.
+3. **Vulnerabilities.** Four, each with a CWE, each reachable from text a member
+   of the public can supply, and each filed by a reporter who does not know what
+   they have found. A harvested corpus of library defects contains bugs in
+   security-adjacent code; it does not contain reachable vulnerabilities with the
+   severity deliberately left out of the report.
+4. **Defect shapes that are not one expression.** A harvested case is admitted by
+   executing an expression and comparing values, so what it can hold is what one
+   expression can show. Async ordering
+   ([`issues/05`](issues/05-nightly-reminders-report-zero.md)), a missing sort
+   comparator ([`issues/09`](issues/09-annual-report-largest-bin-wrong.md)) and a
+   shared mutable default that only appears across two objects
+   ([`issues/10`](issues/10-tagging-one-tool-tags-all-of-them.md)) each need
+   several calls and some state before they say anything.
+
+**And one thing that is about cost rather than coverage.** Running the harvested
+corpus clones repositories, installs their dependency trees at commits from
+several years ago, and spends real money on a model provider. Running this one
+needs none of that. `npm test`, `npm run repro` and `npm run negative` are local
+`vitest`, this repository has no runtime dependencies, and its ground truth —
+56 green, 28 red, 3 green — is checked by CI on every push for free. That is
+what makes it usable as a demonstration and as a smoke test, and it is a real
+answer rather than a consolation one.
+
+**What it cannot do, and what the harvested corpus is for.** Every expectation
+in `SEEDED.md` was written by the same people who wrote the defects, which makes
+it a test of whether Credda agrees with them rather than a test of whether it is
+right. Nothing here measures how often real inbound is gradeable at all, and
+nothing here is prose from somebody with no idea Credda exists. Those are
+measurements, and they need real reports and a fix commit nobody here authored.
+This repository is not evidence about Credda's accuracy and should never be
+quoted as any.
 
 ## Five minutes
 
@@ -123,9 +192,11 @@ would be reproducing it and missing what it is.
 
 [`.github/workflows/credda.yml`](.github/workflows/credda.yml) is ready to run:
 a `triage` job on opened issues and an `investigate` job on the `credda` label,
-`contents: read` and `issues: write` and nothing else.
+`contents: read` and `issues: write` and `id-token: write` and nothing else.
+The third mints the OIDC token the action's launcher fetches the engine with;
+it grants no access to anything of this repository's.
 
-> **The action reference, as of 2026-08-27.** Both `uses:` lines point at
+> **The action reference, as of 2026-08-30.** Both `uses:` lines point at
 > `Credda-io/action@v1`, and that resolves: the repository is public and the
 > `v1` tag exists. It previously said `codereefai/codereef-action@v1`, which was
 > never a real repository under either organisation -- the action lives in a
@@ -133,7 +204,17 @@ a `triage` job on opened issues and an `investigate` job on the `credda` label,
 > in the name as well as the owner and would not have resolved even before the
 > rename.
 >
-> Two things are worth knowing rather than assuming. The action carries no
+> Both `uses:` lines also pass `label: credda` explicitly rather than relying
+> on the action's default. At `@v1` that default is `codereef`, and the action
+> re-checks the applied label against it, so a job triggered by the `credda`
+> label would enter the action, fail that re-check, and **exit 0** -- green,
+> and having done nothing. Copy the `label:` line along with the rest.
+>
+> That line was missing here until 2026-08-29, which means **every green run in
+> this workflow's history was that no-op**. Nothing in this repository has been
+> exercised end to end by it, so read its run history as evidence of nothing.
+>
+> Two more things are worth knowing rather than assuming. The action carries no
 > published GitHub Release, only the tag, so `@v1` is a moving reference: **pin
 > a commit SHA** if you need this workflow to keep meaning one thing. And by its
 > own README the install path is proven end to end while `investigate` --
@@ -141,8 +222,14 @@ a `triage` job on opened issues and an `investigate` job on the `credda` label,
 > repositories. Treat the first investigation here as an experiment rather than
 > a service.
 
-To try it: paste the body of any file in `issues/` into a new issue in your
-fork, then add the `credda` label.
+To try it: paste the body of any file in `issues/` into a new issue in **your
+own fork**, then add the `credda` label.
+
+Applying that label now starts a real investigation -- checkout, sandbox,
+reproduction -- where before the fix above it started nothing at all. If the
+fork has an `ANTHROPIC_API_KEY` secret set, the label also spends against that
+key, once per label applied. Do it deliberately, and on your fork rather than
+on `Credda-io/toolshed`.
 
 ```bash
 gh label create credda \

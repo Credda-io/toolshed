@@ -5,7 +5,8 @@
 # holds the seeded failures and is red on purpose; wiring it in as a step would
 # make a permanently red badge that nobody reads. `npm run repro` is a thing you
 # run by hand when you want to see the defects. The second job below inverts it
-# instead, so that a seeded defect quietly going green is still caught.
+# instead, per reproduction, so that a seeded defect quietly going green is
+# still caught -- see `scripts/check-repro-red.mjs`.
 name: CI
 
 on:
@@ -29,10 +30,20 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # SEEDED.md is the answer key a tool is judged against. This fails if a
+      # report was added, renamed or removed without it, or if the counts it
+      # publishes stopped matching the directories.
+      - run: npm run check:seeded
 
-  # Proof that the seeded defects are still seeded. This job PASSES when the
-  # repro suite FAILS: a green repro run means somebody fixed a bug the demo
-  # depends on, and the demo would then be quietly lying about what it holds.
+  # Proof that the seeded defects are still seeded, one reproduction at a time.
+  #
+  # This job used to run `npm run repro` and require a non-zero exit. A non-zero
+  # exit only means at least one of the fourteen reproductions failed, so a
+  # single defect could be fixed and the job would still pass on the other
+  # thirteen -- which is the demo quietly lying about what it holds, the exact
+  # thing the job exists to prevent. `check:repro-red` reads the per-file
+  # results and requires every reproduction to be red, none skipped, and none
+  # missing from the run.
   seeded-bugs-still-fail:
     runs-on: ubuntu-latest
     steps:
@@ -42,12 +53,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: repro/ must be red
-        run: |
-          if npm run repro; then
-            echo "::error::repro/ passed. A seeded defect has been fixed; update SEEDED.md and issues/ to match."
-            exit 1
-          fi
-          echo "repro/ failed, as designed."
+      - name: every reproduction in repro/ must be red
+        run: npm run check:repro-red
       - name: negative/ must be green
         run: npm run negative

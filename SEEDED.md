@@ -61,8 +61,9 @@ differently from a bug report. Nobody attaches a stack trace to an XSS; they
 attach a URL and an assumption about what you will do with it.
 
 **The boundary, stated so nobody has to guess at it.** Every vulnerability here
-is code written for this repository, sitting in `src/`, marked as deliberate in
-its own docblock. **No dependency has been pinned to a vulnerable version, and
+is code written for this repository, sitting in `src/`, and marked as
+deliberate where it lives -- `src/csv.ts` says so on the function, `src/portal.ts`
+says so at the top of the file for all three of its. **No dependency has been pinned to a vulnerable version, and
 none ever will be.** Seeding a real CVE into a real package would make this
 repository a distribution channel for it, would set off every scanner pointed
 at anything that installs it, and would be somebody else's code rather than an
@@ -119,8 +120,25 @@ anything.
 npm test          # 9 files, 56 tests, all pass. The repository's own suite.
 npm run repro     # 14 files, 28 tests, ALL FAIL. One file per real defect.
 npm run negative  # 3 files, 3 tests, all pass. Cases 13, 14 and 19.
+npm run check:seeded   # this file still describes the files on disk.
+npm run check:repro-red  # EVERY reproduction above is still red, one by one.
 ```
 
-`.github/workflows/ci.yml` enforces all three, including that `repro/` stays
-red. If a seeded defect is ever fixed, that job fails and this file has to be
-updated to match.
+`.github/workflows/ci.yml` enforces all five. If a seeded defect is ever fixed,
+`check:repro-red` names the file it was fixed in and this file has to be updated
+to match. It replaced a check that only required `npm run repro` to exit
+non-zero, which one red reproduction out of fourteen was enough to satisfy --
+so a single defect could quietly stop being one.
+
+The first four catch a defect that stopped being one. `check:seeded` catches
+the other direction, which they cannot see: a case added, renamed or removed
+without this file moving with it. It also checks the pointers in this file that
+were prose until 2026-08-30 -- every `src/`, `test/`, `repro/` and `negative/`
+path it names, every function named in a `Where` cell, the test title case 14
+quotes out of `test/holds.test.ts`, and case 12's answer, which is the claim
+that `priceLoan`, `buildLoanFixture` and a pricing module exist nowhere here.
+That last one fails in the direction that matters: the day something here IS
+called `priceLoan`, case 12 stops being `NO_RUNNABLE_CHECK` and the answer key
+would otherwise go on saying it is. An answer key that has quietly stopped listing
+a report is worse than a missing one -- the report is still in `issues/` for a
+tool to pick up, and nothing says what the right answer is.
