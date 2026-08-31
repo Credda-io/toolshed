@@ -39,5 +39,10 @@ Two kinds count:
 - A vulnerability in Credda itself, or in one of the other Credda repositories.
   Use **GitHub's private vulnerability reporting** on the repository concerned:
   the Security tab, then "Report a vulnerability". Please do not open a public
-  issue for something exploitable. If you would rather not use GitHub,
-  [credda.io](https://credda.io) has the contact details.
+  issue for something exploitable. If you would rather not use GitHub, email
+  [security@credda.io](mailto:security@credda.io?subject=Security%20disclosure),
+  the address published at
+  [credda.io/.well-known/security.txt](https://credda.io/.well-known/security.txt).
+  Expect acknowledgement within 3 business days and an initial severity call
+  within 10. There is no paid bounty programme. The org-wide policy is
+  [`Credda-io/.github/SECURITY.md`](https://github.com/Credda-io/.github/blob/main/SECURITY.md).
