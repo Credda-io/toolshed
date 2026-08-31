@@ -7,8 +7,10 @@
  * `PortalResponse`, so the routing, the sockets and the TLS are somebody else's
  * problem and the behaviour is testable without any of them.
  *
- * FOUR OF THE SEEDED DEFECTS LIVE IN THIS FILE AND ARE EXPLOITABLE. They are
- * listed in ../SEEDED.md with the reports that describe them. This module is
+ * THREE OF THE FOUR SEEDED VULNERABILITIES LIVE IN THIS FILE AND ARE
+ * EXPLOITABLE: cases 15, 16 and 17. The fourth is in ./csv.ts, on the export
+ * side. All four are listed in ../SEEDED.md with the reports that describe
+ * them. This module is
  * here because a lending library that only gets arithmetic wrong is a thin
  * exhibit: Credda looks for security risks as well as bugs, and a corpus with
  * no reachable vulnerability in it cannot show that half of the work.

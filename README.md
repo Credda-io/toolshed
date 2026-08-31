@@ -36,7 +36,9 @@ opens none unless you set its `open-pull-request` input, which defaults to
 `false`, **and** add `contents: write` and `pull-requests: write` to your own
 workflow's `permissions:` block, which a default install does not grant. Turning
 the input on without both scopes fails at that step rather than opening
-anything. How often a run reaches a proven fix at all has not been measured. It
+anything -- and at `Credda-io/action@v1`, the tag this repository pins, that
+input does not exist on any reachable version, so here there is nothing yet to
+turn on. How often a run reaches a proven fix at all has not been measured. It
 proposes and never merges.
 
 Toolshed is the repository you point it at when you want to see that for
@@ -51,11 +53,13 @@ providers is easiest to see.
 
 This paragraph said, on 2026-08-27, that pull request authoring was not wired up
 and that a run here comments rather than opening a PR. Some of that has moved:
-the delivery path was wired on 2026-08-28, and the GitHub Action now has an
+the delivery path was wired on 2026-08-28, and the GitHub Action grows an
 `open-pull-request` input which, when a caller turns it on, commits a verified
-patch and opens a pull request. It is off by default -- a default install still
-asks for no write scopes and still comments -- and it has not yet run against a
-real repository, this one included. So a run here leaves a comment unless you
+patch and opens a pull request. As of 2026-08-29 that input lives on the
+action's unmerged branch -- not at `@v1` and not on its default branch -- so no
+version this workflow can reach accepts it. It is off by default in any case, a
+default install asks for no write scopes and still comments, and it has not yet
+run against a real repository, this one included. So a run here leaves a comment unless you
 deliberately turned delivery on, and that is worth knowing before you read a
 result as a verdict on the engine.
 
@@ -192,7 +196,7 @@ a `triage` job on opened issues and an `investigate` job on the `credda` label,
 The third mints the OIDC token the action's launcher fetches the engine with;
 it grants no access to anything of this repository's.
 
-> **The action reference, as of 2026-08-27.** Both `uses:` lines point at
+> **The action reference, as of 2026-08-30.** Both `uses:` lines point at
 > `Credda-io/action@v1`, and that resolves: the repository is public and the
 > `v1` tag exists. It previously said `codereefai/codereef-action@v1`, which was
 > never a real repository under either organisation -- the action lives in a
@@ -206,6 +210,10 @@ it grants no access to anything of this repository's.
 > label would enter the action, fail that re-check, and **exit 0** -- green,
 > and having done nothing. Copy the `label:` line along with the rest.
 >
+> That line was missing here until 2026-08-29, which means **every green run in
+> this workflow's history was that no-op**. Nothing in this repository has been
+> exercised end to end by it, so read its run history as evidence of nothing.
+>
 > Two more things are worth knowing rather than assuming. The action carries no
 > published GitHub Release, only the tag, so `@v1` is a moving reference: **pin
 > a commit SHA** if you need this workflow to keep meaning one thing. And by its
@@ -214,8 +222,14 @@ it grants no access to anything of this repository's.
 > repositories. Treat the first investigation here as an experiment rather than
 > a service.
 
-To try it: paste the body of any file in `issues/` into a new issue in your
-fork, then add the `credda` label.
+To try it: paste the body of any file in `issues/` into a new issue in **your
+own fork**, then add the `credda` label.
+
+Applying that label now starts a real investigation -- checkout, sandbox,
+reproduction -- where before the fix above it started nothing at all. If the
+fork has an `ANTHROPIC_API_KEY` secret set, the label also spends against that
+key, once per label applied. Do it deliberately, and on your fork rather than
+on `Credda-io/toolshed`.
 
 ```bash
 gh label create credda \

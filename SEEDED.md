@@ -61,8 +61,9 @@ differently from a bug report. Nobody attaches a stack trace to an XSS; they
 attach a URL and an assumption about what you will do with it.
 
 **The boundary, stated so nobody has to guess at it.** Every vulnerability here
-is code written for this repository, sitting in `src/`, marked as deliberate in
-its own docblock. **No dependency has been pinned to a vulnerable version, and
+is code written for this repository, sitting in `src/`, and marked as
+deliberate where it lives -- `src/csv.ts` says so on the function, `src/portal.ts`
+says so at the top of the file for all three of its. **No dependency has been pinned to a vulnerable version, and
 none ever will be.** Seeding a real CVE into a real package would make this
 repository a distribution channel for it, would set off every scanner pointed
 at anything that installs it, and would be somebody else's code rather than an
