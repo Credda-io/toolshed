@@ -77,4 +77,17 @@ jobs:
           # it reproduces and reports, and cannot reason over prose. Several of
           # the seeded reports in issues/ are prose-heavy, so a key makes the
           # difference visible.
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          #
+          # THIS MUST NOT BE THE PRODUCTION KEY. It was `secrets.ANTHROPIC_API_KEY`
+          # until 2026-08-31 -- the same key credda-backend serves customer traffic
+          # on. This repository is PUBLIC and this job feeds the model an issue body
+          # that anyone on the internet can author, so a successful prompt injection
+          # here reaches whatever that key can reach. The job is gated on a
+          # maintainer applying the `credda` label, which controls who can start it
+          # but not who can write what it reads.
+          #
+          # Use a dedicated key, scoped and given a low spend cap, so the blast
+          # radius of this workflow is this workflow. If the secret is unset the
+          # deterministic provider runs, which is a degraded report and not an
+          # outage -- the safe direction to fail.
+          anthropic-api-key: ${{ secrets.TOOLSHED_ANTHROPIC_API_KEY }}
