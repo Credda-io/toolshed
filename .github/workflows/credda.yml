@@ -74,11 +74,12 @@ jobs:
       - uses: Credda-io/action@v1
         with:
           mode: triage
-          # Passed explicitly, not left to the default. At `@v1` the action's
-          # `label` default is `codereef`, so without this line triage would
-          # stay quiet for the wrong name -- and an issue opened already
-          # carrying `credda` would get a triage note on top of the
-          # investigation that is about to run on it.
+          # Passed explicitly, not left to the default. This comment said
+          # until 2026-09-20 that at `@v1` the default is `codereef`; the tag
+          # moved on 2026-09-04 and it is `credda,codereef` there now. The line
+          # stays because triage staying quiet for the wrong name is the kind
+          # of failure that shows up as silence, and because the default is
+          # documented to drop `codereef` when the deprecation window closes.
           label: credda
 
   investigate:
@@ -92,13 +93,16 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: Credda-io/action@v1
         with:
-          # Passed explicitly, not left to the default, and this is the whole
-          # reason the line exists. The action re-checks the applied label
-          # against this input as defence in depth. At `@v1` the default is
-          # `codereef`, so a job triggered by the `credda` label above would
-          # enter the action, fail that re-check, and EXIT 0 -- a green job
-          # that did nothing, with no red anywhere to notice it by. The
-          # default only became `credda,codereef` after the tag was cut.
+          # Passed explicitly, not left to the default. The action re-checks
+          # the applied label against this input as defence in depth.
+          #
+          # This comment said until 2026-09-20 that at `@v1` the default is
+          # `codereef`, so that a job triggered by the `credda` label above
+          # would enter the action, fail the re-check and EXIT 0 -- a green job
+          # that did nothing. True when the tag was cut; the tag moved on
+          # 2026-09-04 and `git show v1:action.yml` line 210 is now
+          # `default: credda,codereef`. The line is defence in depth rather
+          # than load-bearing, and stays for that.
           label: credda
           # Optional. Without a key the deterministic heuristic provider runs:
           # it reproduces and reports, and cannot reason over prose. Several of

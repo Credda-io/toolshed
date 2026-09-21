@@ -36,9 +36,12 @@ opens none unless you set its `open-pull-request` input, which defaults to
 `false`, **and** add `contents: write` and `pull-requests: write` to your own
 workflow's `permissions:` block, which a default install does not grant. Turning
 the input on without both scopes fails at that step rather than opening
-anything -- and at `Credda-io/action@v1`, the tag this repository pins, that
-input does not exist on any reachable version, so here there is nothing yet to
-turn on. How often a run reaches a proven fix at all has not been measured. It
+anything. This sentence continued, until 2026-09-20, "and at
+`Credda-io/action@v1`, the tag this repository pins, that input does not exist
+on any reachable version, so here there is nothing yet to turn on". The tag
+moved on 2026-09-04 and `git show v1:action.yml` declares `open-pull-request`
+there with `default: 'false'`, so it is reachable from this workflow and off
+until somebody turns it on. How often a run reaches a proven fix at all has not been measured. It
 proposes and never merges.
 
 Toolshed is the repository you point it at when you want to see that for
@@ -55,9 +58,11 @@ This paragraph said, on 2026-08-27, that pull request authoring was not wired up
 and that a run here comments rather than opening a PR. Some of that has moved:
 the delivery path was wired on 2026-08-28, and the GitHub Action grows an
 `open-pull-request` input which, when a caller turns it on, commits a verified
-patch and opens a pull request. As of 2026-08-29 that input lives on the
-action's unmerged branch -- not at `@v1` and not on its default branch -- so no
-version this workflow can reach accepts it. It is off by default in any case, a
+patch and opens a pull request. This paragraph said, as of 2026-08-29, that the
+input lived "on the action's unmerged branch -- not at `@v1` and not on its
+default branch -- so no version this workflow can reach accepts it". That
+branch merged and the tag moved on 2026-09-04; `@v1` declares the input today.
+It is off by default in any case, a
 default install asks for no write scopes and still comments, and it has not yet
 run against a real repository, this one included. So a run here leaves a comment unless you
 deliberately turned delivery on, and that is worth knowing before you read a
@@ -205,14 +210,22 @@ it grants no access to anything of this repository's.
 > rename.
 >
 > Both `uses:` lines also pass `label: credda` explicitly rather than relying
-> on the action's default. At `@v1` that default is `codereef`, and the action
-> re-checks the applied label against it, so a job triggered by the `credda`
-> label would enter the action, fail that re-check, and **exit 0** -- green,
-> and having done nothing. Copy the `label:` line along with the rest.
+> on the action's default. Copy the `label:` line along with the rest: the
+> action re-checks the applied label against this input, and naming the label
+> you actually created is worth more than a default documented to drop
+> `codereef` when the deprecation window closes.
 >
-> That line was missing here until 2026-08-29, which means **every green run in
-> this workflow's history was that no-op**. Nothing in this repository has been
-> exercised end to end by it, so read its run history as evidence of nothing.
+> **This paragraph said, until 2026-09-20, that at `@v1` the default is
+> `codereef` alone**, so that a job triggered by the `credda` label would enter
+> the action, fail the re-check and exit 0 green. That was true when written.
+> `git show v1:action.yml` line 210 now reads `default: credda,codereef`: the
+> tag moved on 2026-09-04 and carried the rename with it.
+>
+> The historical claim below it stands, for the window it describes. The
+> `label:` line was missing here until 2026-08-29, and against the tag as it
+> then was, **every green run in this workflow's history before that date was
+> that no-op** -- so read the run history from before 2026-08-29 as evidence of
+> nothing. What is no longer true is that the tag could still produce it.
 >
 > Two more things are worth knowing rather than assuming. The action carries no
 > published GitHub Release, only the tag, so `@v1` is a moving reference: **pin
@@ -231,13 +244,23 @@ fork has an `ANTHROPIC_API_KEY` secret set, the label also spends against that
 key, once per label applied. Do it deliberately, and on your fork rather than
 on `Credda-io/toolshed`.
 
+**The secret is named `TOOLSHED_ANTHROPIC_API_KEY`, not `ANTHROPIC_API_KEY`.**
+This page said the latter until 2026-09-20; the workflow was changed on
+2026-08-31 and `.github/workflows/credda.yml:120` passes
+`${{ secrets.TOOLSHED_ANTHROPIC_API_KEY }}`. The comment above that line
+explains why it must not be the production key: this repository is public, the
+job feeds the model an issue body anyone can author, and a successful prompt
+injection reaches whatever the key reaches. A fork that sets
+`ANTHROPIC_API_KEY` expecting a spend gets a silent no-key run on the
+deterministic provider instead.
+
 ```bash
 gh label create credda \
   --description 'Credda reproduces this bug in a sandbox and comments what it established.'
 ```
 
-An `ANTHROPIC_API_KEY` secret is optional; see the status note above for what
-changes with and without one.
+A `TOOLSHED_ANTHROPIC_API_KEY` secret is optional; see the status note above
+for what changes with and without one.
 
 ## Please do not
 
