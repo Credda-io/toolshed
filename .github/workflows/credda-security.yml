@@ -26,8 +26,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      # Pinned to the security-mode branch of Credda-io/action until it is released under v1.
-      - uses: Credda-io/action@3d9237c88a062dbfad35e3f3e73b4322eee4ff9b
+      # Pinned to the engine v0.1.18 release commit of Credda-io/action until v1 moves to it.
+      - uses: Credda-io/action@2a5247764caedc4baa8aa9441db8004f3e8bf2a6
         id: credda
         with:
           mode: security
