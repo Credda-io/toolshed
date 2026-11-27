@@ -1,0 +1,35 @@
+name: Credda security
+
+# Runs Credda's security mode on this repository: exploit probes and a fuzz
+# stage, each in a container with no network. Only a proven finding is reported.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/credda-security.yml'
+
+permissions:
+  contents: read # checkout of the repository under test
+  id-token: write # the OIDC token the action's launcher fetches the engine with
+  security-events: write # upload proven findings as SARIF to code scanning
+
+concurrency:
+  group: credda-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    runs-on: ubuntu-latest # the docker sandbox needs a Linux runner
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # Pinned to the security-mode branch of Credda-io/action until it is released under v1.
+      - uses: Credda-io/action@3d9237c88a062dbfad35e3f3e73b4322eee4ff9b
+        id: credda
+        with:
+          mode: security
+      - name: Report the count
+        run: echo "proven findings ${{ steps.credda.outputs.security-findings }}"
