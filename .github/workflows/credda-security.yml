@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       # Pinned to the engine v0.1.19 release commit of Credda-io/action until v1 moves to it.
-      - uses: Credda-io/action@633fbebf21d2a667eba57be4932717c570e76755
+      - uses: Credda-io/action@f61935c9095ec0d2f6b2311a806f51a36369d93d
         id: credda
         with:
           mode: security
@@ -75,7 +75,7 @@ jobs:
           repository: ${{ matrix.repository }}
           ref: ${{ matrix.ref }}
           persist-credentials: false
-      - uses: Credda-io/action@633fbebf21d2a667eba57be4932717c570e76755
+      - uses: Credda-io/action@f61935c9095ec0d2f6b2311a806f51a36369d93d
         id: credda
         with:
           mode: security
