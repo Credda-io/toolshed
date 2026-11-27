@@ -26,13 +26,21 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      # Pinned to the engine v0.1.18 release commit of Credda-io/action until v1 moves to it.
-      - uses: Credda-io/action@2a5247764caedc4baa8aa9441db8004f3e8bf2a6
+      # Pinned to the engine v0.1.19 release commit of Credda-io/action until v1 moves to it.
+      - uses: Credda-io/action@633fbebf21d2a667eba57be4932717c570e76755
         id: credda
         with:
           mode: security
-      - name: Report the count
-        run: echo "proven findings ${{ steps.credda.outputs.security-findings }}"
+          extra-probes: xss
+      # The reflected XSS in renderSearchPage is seeded (SEEDED.md, case 16). A run that misses it is a regression.
+      - name: Read the count and the reach
+        env:
+          FOUND: ${{ steps.credda.outputs.security-findings }}
+          REACH: ${{ steps.credda.outputs.security-reach }}
+        run: |
+          echo "proven findings: $FOUND"
+          echo "reach: $REACH"
+          if [ "${FOUND:-0}" -lt 1 ]; then echo "::error::the seeded XSS was not proven"; exit 1; fi
 
   # Known cases, so a release is read against something with a known answer.
   # Each is a public advisory that is already fixed upstream. Nothing here is
@@ -67,7 +75,7 @@ jobs:
           repository: ${{ matrix.repository }}
           ref: ${{ matrix.ref }}
           persist-credentials: false
-      - uses: Credda-io/action@2a5247764caedc4baa8aa9441db8004f3e8bf2a6
+      - uses: Credda-io/action@633fbebf21d2a667eba57be4932717c570e76755
         id: credda
         with:
           mode: security
