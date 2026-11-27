@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@50690392c45eb4aa10997f59a255bb6371a4e9f3 # release candidate, engine v0.1.21
         id: credda
         with:
           mode: security
@@ -68,6 +68,14 @@ jobs:
             repository: wkentaro/gdown
             ref: af569fc6ed300b7974dee66dc51e9f01b57b4dff
             expect: any
+          - name: minimist 1.2.5 (CVE-2021-44906, prototype pollution)
+            repository: minimistjs/minimist
+            ref: aeb3e27dae0412de5c0494e9563a5f10c82cc7a9 # v1.2.5
+            expect: found
+          - name: minimist 1.2.6 (fixed)
+            repository: minimistjs/minimist
+            ref: 7efb22a518b53b06f5b02a1038a88bd6290c2846 # v1.2.6
+            expect: clean
     name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -75,7 +83,7 @@ jobs:
           repository: ${{ matrix.repository }}
           ref: ${{ matrix.ref }}
           persist-credentials: false
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@50690392c45eb4aa10997f59a255bb6371a4e9f3 # release candidate, engine v0.1.21
         id: credda
         with:
           mode: security
@@ -100,7 +108,7 @@ jobs:
           repository: colinhacks/zod
           ref: d40c329910436e528d3c26cb1b9179e05abebf05
           persist-credentials: false
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@50690392c45eb4aa10997f59a255bb6371a4e9f3 # release candidate, engine v0.1.21
         id: credda
         with:
           mode: security
@@ -118,4 +126,32 @@ jobs:
             if (!(p.exercised >= 1)) { console.log("::error::no package was exercised"); process.exit(1); }
             if (r.limited !== false) { console.log("::error::limited should be false when a package was exercised"); process.exit(1); }
             if (r.partial !== true) { console.log("::error::partial should be true: some packages were not tested"); process.exit(1); }
+          '
+
+  # A real Next.js app with no src/ and TSX throughout, so a release is read against the layout most clients have.
+  nextjs:
+    name: vercel/commerce (Next.js, TSX)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: vercel/commerce
+          ref: f7521d57d29f0eb3d23c1399cf9bb299d61fcd21
+          persist-credentials: false
+      - uses: Credda-io/action@50690392c45eb4aa10997f59a255bb6371a4e9f3 # release candidate, engine v0.1.21
+        id: credda
+        with:
+          mode: security
+          upload-sarif: 'false'
+      - name: Read the reach against the known answer
+        env:
+          REACH: ${{ steps.credda.outputs.security-reach }}
+        run: |
+          echo "reach: $REACH"
+          node -e '
+            const r = JSON.parse(process.env.REACH);
+            if (r.limited !== false) { console.log("::error::the app was not exercised"); process.exit(1); }
+            if (!(r.functions >= 10)) { console.log("::error::expected at least 10 functions fuzzed, got " + r.functions); process.exit(1); }
+            if (!(r.sourceFiles && r.sourceFiles.loaded >= 20)) { console.log("::error::expected at least 20 source files loaded"); process.exit(1); }
           '
