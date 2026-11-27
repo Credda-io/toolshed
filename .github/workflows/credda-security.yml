@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@0942d2d77e6b85092ada187476ed58349352f1fa
         id: credda
         with:
           mode: security
@@ -75,7 +75,7 @@ jobs:
           repository: ${{ matrix.repository }}
           ref: ${{ matrix.ref }}
           persist-credentials: false
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@0942d2d77e6b85092ada187476ed58349352f1fa
         id: credda
         with:
           mode: security
@@ -88,3 +88,34 @@ jobs:
           echo "proven findings: $FOUND (expected: $EXPECT)"
           if [ "$EXPECT" = "found" ] && [ "${FOUND:-0}" -lt 1 ]; then echo "::error::a known vulnerable version read clean"; exit 1; fi
           if [ "$EXPECT" = "clean" ] && [ "${FOUND:-0}" -ne 0 ]; then echo "::error::a fixed version produced a finding"; exit 1; fi
+
+  # A real monorepo, so a release is read against a workspace too.
+  monorepo:
+    name: zod workspace (8 packages)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: colinhacks/zod
+          ref: d40c329910436e528d3c26cb1b9179e05abebf05
+          persist-credentials: false
+      - uses: Credda-io/action@0942d2d77e6b85092ada187476ed58349352f1fa
+        id: credda
+        with:
+          mode: security
+          upload-sarif: 'false'
+      - name: Read the reach against the known answer
+        env:
+          REACH: ${{ steps.credda.outputs.security-reach }}
+        run: |
+          echo "reach: $REACH"
+          node -e '
+            const r = JSON.parse(process.env.REACH);
+            const p = r.packages;
+            if (!p) { console.log("::error::no workspace record: the packages were not scanned"); process.exit(1); }
+            if (p.found !== 8) { console.log("::error::expected 8 packages, found " + p.found); process.exit(1); }
+            if (!(p.exercised >= 1)) { console.log("::error::no package was exercised"); process.exit(1); }
+            if (r.limited !== false) { console.log("::error::limited should be false when a package was exercised"); process.exit(1); }
+            if (r.partial !== true) { console.log("::error::partial should be true: some packages were not tested"); process.exit(1); }
+          '
