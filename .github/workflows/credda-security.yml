@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@2a7ee363db7784d579152ed4cd142377409a2968 # release candidate, engine v0.1.22
         id: credda
         with:
           mode: security
@@ -76,6 +76,30 @@ jobs:
             repository: minimistjs/minimist
             ref: 7efb22a518b53b06f5b02a1038a88bd6290c2846 # v1.2.6
             expect: clean
+          - name: ua-parser-js 1.0.32 (CVE-2022-25927, quadratic regex)
+            repository: faisalman/ua-parser-js
+            ref: a2b2e805fa7cbde4aaf9ed2dd7cdc79bfa7e4d40 # 1.0.32
+            expect: found
+          - name: ua-parser-js 1.0.33 (fixed)
+            repository: faisalman/ua-parser-js
+            ref: 67005e3494e390a78f35be4efdc999bc9f7beb30 # 1.0.33
+            expect: clean
+          - name: adm-zip 0.4.7 (CVE-2018-1002204, archive traversal)
+            repository: cthackers/adm-zip
+            ref: 6708a3e5788ff9e67ddba288397f7788a5c02855 # 0.4.7
+            expect: found
+          - name: adm-zip 0.4.11 (fixed)
+            repository: cthackers/adm-zip
+            ref: 80d259f0ff0393659d0d3b101b45db7678b25c61 # 0.4.11
+            expect: clean
+          - name: python-multipart 0.0.6 (CVE-2024-24762, regex)
+            repository: Kludex/python-multipart
+            ref: 4ccfb3a0f20990c1ed682727262b2560707b81df # 0.0.6
+            expect: found
+          - name: python-multipart 0.0.7 (fixed)
+            repository: Kludex/python-multipart
+            ref: c83e6da1a3a6ed002ebb22138baa1664134d540c # 0.0.7
+            expect: clean
     name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -83,7 +107,7 @@ jobs:
           repository: ${{ matrix.repository }}
           ref: ${{ matrix.ref }}
           persist-credentials: false
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@2a7ee363db7784d579152ed4cd142377409a2968 # release candidate, engine v0.1.22
         id: credda
         with:
           mode: security
@@ -108,7 +132,7 @@ jobs:
           repository: colinhacks/zod
           ref: d40c329910436e528d3c26cb1b9179e05abebf05
           persist-credentials: false
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@2a7ee363db7784d579152ed4cd142377409a2968 # release candidate, engine v0.1.22
         id: credda
         with:
           mode: security
@@ -139,7 +163,7 @@ jobs:
           repository: vercel/commerce
           ref: f7521d57d29f0eb3d23c1399cf9bb299d61fcd21
           persist-credentials: false
-      - uses: Credda-io/action@v1
+      - uses: Credda-io/action@2a7ee363db7784d579152ed4cd142377409a2968 # release candidate, engine v0.1.22
         id: credda
         with:
           mode: security
