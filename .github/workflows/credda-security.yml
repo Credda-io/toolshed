@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: Credda-io/action@2a7ee363db7784d579152ed4cd142377409a2968 # release candidate, engine v0.1.22
+      - uses: Credda-io/action@v1
         id: credda
         with:
           mode: security
@@ -107,7 +107,7 @@ jobs:
           repository: ${{ matrix.repository }}
           ref: ${{ matrix.ref }}
           persist-credentials: false
-      - uses: Credda-io/action@2a7ee363db7784d579152ed4cd142377409a2968 # release candidate, engine v0.1.22
+      - uses: Credda-io/action@v1
         id: credda
         with:
           mode: security
@@ -132,7 +132,7 @@ jobs:
           repository: colinhacks/zod
           ref: d40c329910436e528d3c26cb1b9179e05abebf05
           persist-credentials: false
-      - uses: Credda-io/action@2a7ee363db7784d579152ed4cd142377409a2968 # release candidate, engine v0.1.22
+      - uses: Credda-io/action@v1
         id: credda
         with:
           mode: security
@@ -163,7 +163,7 @@ jobs:
           repository: vercel/commerce
           ref: f7521d57d29f0eb3d23c1399cf9bb299d61fcd21
           persist-credentials: false
-      - uses: Credda-io/action@2a7ee363db7784d579152ed4cd142377409a2968 # release candidate, engine v0.1.22
+      - uses: Credda-io/action@v1
         id: credda
         with:
           mode: security
