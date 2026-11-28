@@ -1,0 +1,181 @@
+name: Credda security
+
+# Runs Credda's security mode on this repository: exploit probes and a fuzz
+# stage, each in a container with no network. Only a proven finding is reported.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/credda-security.yml'
+
+permissions:
+  contents: read # checkout of the repository under test
+  id-token: write # the OIDC token the action's launcher fetches the engine with
+  security-events: write # upload proven findings as SARIF to code scanning
+
+concurrency:
+  group: credda-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    runs-on: ubuntu-latest # the docker sandbox needs a Linux runner
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: Credda-io/action@v1
+        id: credda
+        with:
+          mode: security
+          extra-probes: xss
+      # The reflected XSS in renderSearchPage is seeded (SEEDED.md, case 16). A run that misses it is a regression.
+      - name: Read the count and the reach
+        env:
+          FOUND: ${{ steps.credda.outputs.security-findings }}
+          REACH: ${{ steps.credda.outputs.security-reach }}
+        run: |
+          echo "proven findings: $FOUND"
+          echo "reach: $REACH"
+          if [ "${FOUND:-0}" -lt 1 ]; then echo "::error::the seeded XSS was not proven"; exit 1; fi
+
+  # Known cases, so a release is read against something with a known answer.
+  # Each is a public advisory that is already fixed upstream. Nothing here is
+  # uploaded to this repository's code scanning.
+  known:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: flat 5.0.0 (prototype pollution, fixed in 5.0.1)
+            repository: hughsk/flat
+            ref: 38239cce29330b715d3e31aa96115641bfcc22bd # 5.0.0
+            expect: found
+          - name: flat 5.0.2 (fixed)
+            repository: hughsk/flat
+            ref: e5ffd664df8a1fcc05adc22dd0ac6a2b32a0955d # 5.0.2
+            expect: clean
+          - name: gdown before the fix (GHSA-76hw-p97h-883f, archive traversal)
+            repository: wkentaro/gdown
+            ref: 7f4cb689c5e4e31a55fd007fc400c50975f42799
+            expect: found
+          - name: gdown at the fix
+            repository: wkentaro/gdown
+            ref: af569fc6ed300b7974dee66dc51e9f01b57b4dff
+            expect: any
+          - name: minimist 1.2.5 (CVE-2021-44906, prototype pollution)
+            repository: minimistjs/minimist
+            ref: aeb3e27dae0412de5c0494e9563a5f10c82cc7a9 # v1.2.5
+            expect: found
+          - name: minimist 1.2.6 (fixed)
+            repository: minimistjs/minimist
+            ref: 7efb22a518b53b06f5b02a1038a88bd6290c2846 # v1.2.6
+            expect: clean
+          - name: ua-parser-js 1.0.32 (CVE-2022-25927, quadratic regex)
+            repository: faisalman/ua-parser-js
+            ref: a2b2e805fa7cbde4aaf9ed2dd7cdc79bfa7e4d40 # 1.0.32
+            expect: found
+          - name: ua-parser-js 1.0.33 (fixed)
+            repository: faisalman/ua-parser-js
+            ref: 67005e3494e390a78f35be4efdc999bc9f7beb30 # 1.0.33
+            expect: clean
+          - name: adm-zip 0.4.7 (CVE-2018-1002204, archive traversal)
+            repository: cthackers/adm-zip
+            ref: 6708a3e5788ff9e67ddba288397f7788a5c02855 # 0.4.7
+            expect: found
+          - name: adm-zip 0.4.11 (fixed)
+            repository: cthackers/adm-zip
+            ref: 80d259f0ff0393659d0d3b101b45db7678b25c61 # 0.4.11
+            expect: clean
+          - name: python-multipart 0.0.6 (CVE-2024-24762, regex)
+            repository: Kludex/python-multipart
+            ref: 4ccfb3a0f20990c1ed682727262b2560707b81df # 0.0.6
+            expect: found
+          - name: python-multipart 0.0.7 (fixed)
+            repository: Kludex/python-multipart
+            ref: c83e6da1a3a6ed002ebb22138baa1664134d540c # 0.0.7
+            expect: clean
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ matrix.repository }}
+          ref: ${{ matrix.ref }}
+          persist-credentials: false
+      - uses: Credda-io/action@v1
+        id: credda
+        with:
+          mode: security
+          upload-sarif: 'false'
+      - name: Read the count against the known answer
+        env:
+          FOUND: ${{ steps.credda.outputs.security-findings }}
+          EXPECT: ${{ matrix.expect }}
+        run: |
+          echo "proven findings: $FOUND (expected: $EXPECT)"
+          if [ "$EXPECT" = "found" ] && [ "${FOUND:-0}" -lt 1 ]; then echo "::error::a known vulnerable version read clean"; exit 1; fi
+          if [ "$EXPECT" = "clean" ] && [ "${FOUND:-0}" -ne 0 ]; then echo "::error::a fixed version produced a finding"; exit 1; fi
+
+  # A real monorepo, so a release is read against a workspace too.
+  monorepo:
+    name: zod workspace (8 packages)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: colinhacks/zod
+          ref: d40c329910436e528d3c26cb1b9179e05abebf05
+          persist-credentials: false
+      - uses: Credda-io/action@v1
+        id: credda
+        with:
+          mode: security
+          upload-sarif: 'false'
+      - name: Read the reach against the known answer
+        env:
+          REACH: ${{ steps.credda.outputs.security-reach }}
+        run: |
+          echo "reach: $REACH"
+          node -e '
+            const r = JSON.parse(process.env.REACH);
+            const p = r.packages;
+            if (!p) { console.log("::error::no workspace record: the packages were not scanned"); process.exit(1); }
+            if (p.found !== 8) { console.log("::error::expected 8 packages, found " + p.found); process.exit(1); }
+            if (!(p.exercised >= 1)) { console.log("::error::no package was exercised"); process.exit(1); }
+            if (r.limited !== false) { console.log("::error::limited should be false when a package was exercised"); process.exit(1); }
+            if (r.partial !== true) { console.log("::error::partial should be true: some packages were not tested"); process.exit(1); }
+          '
+
+  # A real Next.js app with no src/ and TSX throughout, so a release is read against the layout most clients have.
+  nextjs:
+    name: vercel/commerce (Next.js, TSX)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: vercel/commerce
+          ref: f7521d57d29f0eb3d23c1399cf9bb299d61fcd21
+          persist-credentials: false
+      - uses: Credda-io/action@v1
+        id: credda
+        with:
+          mode: security
+          upload-sarif: 'false'
+      - name: Read the reach against the known answer
+        env:
+          REACH: ${{ steps.credda.outputs.security-reach }}
+        run: |
+          echo "reach: $REACH"
+          node -e '
+            const r = JSON.parse(process.env.REACH);
+            if (r.limited !== false) { console.log("::error::the app was not exercised"); process.exit(1); }
+            if (!(r.functions >= 10)) { console.log("::error::expected at least 10 functions fuzzed, got " + r.functions); process.exit(1); }
+            if (!(r.sourceFiles && r.sourceFiles.loaded >= 20)) { console.log("::error::expected at least 20 source files loaded"); process.exit(1); }
+          '
